@@ -1,0 +1,35 @@
+language: python
+sudo: required
+
+services:
+  - docker
+
+python:
+  - 3.6
+
+env:
+  - DJANGO=2.1.2
+
+install:
+  - pip3 install -r backend/requirements.txt
+  - pip3 install coveralls
+  
+before_script:
+  - cd backend
+  #- docker pull coderdude/ase1:v1
+  #- docker tag coderdude/ase1:v1 pybuntu
+  - python manage.py makemigrations
+  - python manage.py migrate
+
+script:
+  - python manage.py check
+  - coverage run --source=main_page,questions,registration manage.py test
+
+after_success:
+coveralls  
+
+notifications:
+  slack:
+    rooms:
+	  - techfesia2019:SSfS1f2fF9x676ViRFipIpe7#general
+	  - techfesia2019:SSfS1f2fF9x676ViRFipIpe7#random
