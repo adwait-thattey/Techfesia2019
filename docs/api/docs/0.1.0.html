@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Techfesia2019</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script>
+        hljs.configure({
+            tabReplace: '    ',
+        });
+        hljs.initHighlightingOnLoad();
+    </script>
+    <style>body {
+    position: relative;
+}
+
+h1 {
+    margin-top: 5px;
+}
+
+h1, h2, h3, h4 {
+    color: #2b2b2b;
+}
+
+h2:after {
+    content: ' ';
+}
+
+h5 {
+    font-weight: bold;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+    display: none;
+    position: absolute;
+    margin-left: 8px;
+}
+
+h1:hover a, h2:hover a, h3:hover a, h4:hover a, h5:hover a, h6:hover a {
+    color: #a5a5a5;
+    display: initial;
+}
+
+.nav.nav-tabs > li > a {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.tab-content {
+    padding-top: 8px;
+}
+
+.table {
+    margin-bottom: 8px;
+}
+
+pre {
+    border-radius: 0px;
+    border: none;
+}
+
+pre code {
+    margin: -9.5px;
+}
+
+.request {
+    margin-top: 12px;
+    margin-bottom: 24px;
+}
+
+.response-text-sample {
+    padding: 0px !important;
+}
+
+.response-text-sample pre {
+    margin-bottom: 0px;
+}
+
+
+#sidebar-wrapper {
+    z-index: 1000;
+    position: fixed;
+    left: 250px;
+    width: 250px;
+    height: 100%;
+    margin-left: -250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #2b2b2b;
+    padding-top: 20px;
+}
+
+#sidebar-wrapper ul {
+    width: 250px;
+}
+
+#sidebar-wrapper ul li {
+    margin-right: 10px;
+}
+
+#sidebar-wrapper ul li a:hover {
+    background: inherit;
+    text-decoration: none;
+}
+
+#sidebar-wrapper ul li a {
+    display: block;
+    color: #ECF0F1;
+    padding: 6px 15px;
+}
+
+#sidebar-wrapper ul li ul {
+    padding-left: 25px;
+}
+
+#sidebar-wrapper ul li ul li a {
+    padding: 1px 0px;
+}
+
+#sidebar-wrapper ul li a:hover,
+#sidebar-wrapper ul li a:focus {
+    color: #e0c46c;
+    border-right: solid 1px #e0c46c;
+}
+
+#sidebar-wrapper ul li.active > a {
+    color: #e0c46c;
+    border-right: solid 3px #e0c46c;
+}
+
+#sidebar-wrapper ul li:not(.active) ul {
+    display: none;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    position: absolute;
+    padding: 15px 15px 15px 250px;
+}
+</style>
+</head>
+<body data-spy="scroll" data-target=".scrollspy">
+<div id="sidebar-wrapper">
+    <div class="scrollspy">
+    <ul id="main-menu" data-spy="affix" class="nav">
+        
+        <li>
+            <a href="#doc-api-detail">API detail</a>
+        </li>
+        
+        
+        
+        <li>
+            <a href="#folder-authentication">Authentication</a>
+            <ul>
+                
+                <li>
+                    <a href="#request-authentication-user-token-pair-obtain">User Token Pair Obtain</a>
+                </li>
+                
+                <li>
+                    <a href="#request-authentication-user-token-refresh">User Token Refresh</a>
+                </li>
+                
+                <li>
+                    <a href="#request-authentication-staff-token-pair-obtain">Staff token pair obtain</a>
+                </li>
+                
+                <li>
+                    <a href="#request-authentication-staff-token-refresh">Staff Token Refresh</a>
+                </li>
+                
+                <li>
+                    <a href="#request-authentication-superuser-token-pair-obtain">SuperUser Token Pair obtain</a>
+                </li>
+                
+                <li>
+                    <a href="#request-authentication-superuser-token-refresh">SuperUser Token Refresh</a>
+                </li>
+                
+            </ul>
+        </li>
+        
+        
+        <li>
+            <a href="#folder-users">Users</a>
+            <ul>
+                
+                <li>
+                    <a href="#request-users-get-users-staff-only">Get Users (Staff only)</a>
+                </li>
+                
+                <li>
+                    <a href="#request-users-get-user-details">Get user details</a>
+                </li>
+                
+            </ul>
+        </li>
+        
+    </ul>
+</div>
+
+</div>
+<div id="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                
+
+                
+
+                <h2 id="doc-api-detail">
+                    API detail
+                    <a href="#doc-api-detail"><i class="glyphicon glyphicon-link"></i></a>
+                </h2>
+
+                
+
+
+                
+                
+                <div class="endpoints-group">
+                    <h3 id="folder-authentication">
+                        Authentication
+                        <a href="#folder-authentication"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div></div>
+
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-authentication-user-token-pair-obtain">
+                            User Token Pair Obtain
+                            <a href="#request-authentication-user-token-pair-obtain"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-authentication-user-token-pair-obtain-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-authentication-user-token-pair-obtain-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-authentication-user-token-pair-obtain-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{
+	"username":"test_user_001",
+	"password":"Hello World"
+}' "http://localhost:8000/auth/token/obtain/"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-authentication-user-token-pair-obtain-example-http">
+                                    <pre><code class="hljs http">POST /auth/token/obtain/ HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+	"username":"test_user_001",
+	"password":"Hello World"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-authentication-user-token-pair-obtain-responses-0875ce00-e24f-4ae2-ac84-aca66ccfdd98" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-authentication-user-token-pair-obtain-responses-0875ce00-e24f-4ae2-ac84-aca66ccfdd98">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNDU2LCJqdGkiOiJmZDJmOWQ1ZTFhN2M0MmU4OTQ5MzVlMzYyYmNhOGJjYSJ9.NHlztMGER7UADHZJlxNG0WSi22a2KaYSfd1S-AuT7lU",
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImNvbGRfc3R1ZmYiOiLimIMiLCJleHAiOjIzNDU2NywianRpIjoiZGUxMmY0ZTY3MDY4NDI3ODg5ZjE1YWMyNzcwZGEwNTEifQ.aEoAYkSJjoWH1boshQAaTkf8G3yn0kapko6HFRt7Rh4"
+}</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-authentication-user-token-refresh">
+                            User Token Refresh
+                            <a href="#request-authentication-user-token-refresh"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-authentication-user-token-refresh-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-authentication-user-token-refresh-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-authentication-user-token-refresh-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{
+	"refresh":"sample_token"
+}' "http://localhost:8000/auth/token/refresh/"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-authentication-user-token-refresh-example-http">
+                                    <pre><code class="hljs http">POST /auth/token/refresh/ HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+	"refresh":"sample_token"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-authentication-user-token-refresh-responses-1139c503-d212-4c37-8b11-64ad09daf56d" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-authentication-user-token-refresh-responses-1139c503-d212-4c37-8b11-64ad09daf56d">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNTY3LCJqdGkiOiJjNzE4ZTVkNjgzZWQ0NTQyYTU0NWJkM2VmMGI0ZGQ0ZSJ9.ekxRxgb9OKmHkfy-zs1Ro_xs1eMLXiR17dIDBVxeT-w"
+}</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-authentication-staff-token-pair-obtain">
+                            Staff token pair obtain
+                            <a href="#request-authentication-staff-token-pair-obtain"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-authentication-staff-token-pair-obtain-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-authentication-staff-token-pair-obtain-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-authentication-staff-token-pair-obtain-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{
+	"username":"test_staff_user_001",
+	"password":"Hello Staff Password"
+}' "http://localhost:8000/auth/token/obtain/"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-authentication-staff-token-pair-obtain-example-http">
+                                    <pre><code class="hljs http">POST /auth/token/obtain/ HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+	"username":"test_staff_user_001",
+	"password":"Hello Staff Password"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-authentication-staff-token-pair-obtain-responses-fcce4495-c35c-46a7-8c20-114fc08424cb" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-authentication-staff-token-pair-obtain-responses-fcce4495-c35c-46a7-8c20-114fc08424cb">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNDU2LCJqdGkiOiJmZDJmOWQ1ZTFhN2M0MmU4OTQ5MzVlMzYyYmNhOGJjYSJ9.NHlztMGER7UADHZJlxNG0WSi22a2KaYSfd1S-AuT7lU",
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImNvbGRfc3R1ZmYiOiLimIMiLCJleHAiOjIzNDU2NywianRpIjoiZGUxMmY0ZTY3MDY4NDI3ODg5ZjE1YWMyNzcwZGEwNTEifQ.aEoAYkSJjoWH1boshQAaTkf8G3yn0kapko6HFRt7Rh4"
+}</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-authentication-staff-token-refresh">
+                            Staff Token Refresh
+                            <a href="#request-authentication-staff-token-refresh"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-authentication-staff-token-refresh-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-authentication-staff-token-refresh-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-authentication-staff-token-refresh-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{
+	"refresh":"sample_staff_token"
+}' "http://localhost:8000/auth/token/refresh/"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-authentication-staff-token-refresh-example-http">
+                                    <pre><code class="hljs http">POST /auth/token/refresh/ HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+	"refresh":"sample_staff_token"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-authentication-staff-token-refresh-responses-1c3407e6-c331-41bc-8a5b-0b0f48f6386a" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-authentication-staff-token-refresh-responses-1c3407e6-c331-41bc-8a5b-0b0f48f6386a">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNTY3LCJqdGkiOiJjNzE4ZTVkNjgzZWQ0NTQyYTU0NWJkM2VmMGI0ZGQ0ZSJ9.ekxRxgb9OKmHkfy-zs1Ro_xs1eMLXiR17dIDBVxeT-w"
+}</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-authentication-superuser-token-pair-obtain">
+                            SuperUser Token Pair obtain
+                            <a href="#request-authentication-superuser-token-pair-obtain"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-authentication-superuser-token-pair-obtain-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-authentication-superuser-token-pair-obtain-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-authentication-superuser-token-pair-obtain-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{
+	"username":"sample_superuser_001",
+	"password":"Hello Superuser Password"
+}' "http://localhost:8000/auth/token/obtain/"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-authentication-superuser-token-pair-obtain-example-http">
+                                    <pre><code class="hljs http">POST /auth/token/obtain/ HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+	"username":"sample_superuser_001",
+	"password":"Hello Superuser Password"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-authentication-superuser-token-pair-obtain-responses-7f7880e3-ede0-4191-a27a-fe79bd084b9f" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-authentication-superuser-token-pair-obtain-responses-7f7880e3-ede0-4191-a27a-fe79bd084b9f">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNDU2LCJqdGkiOiJmZDJmOWQ1ZTFhN2M0MmU4OTQ5MzVlMzYyYmNhOGJjYSJ9.NHlztMGER7UADHZJlxNG0WSi22a2KaYSfd1S-AuT7lU",
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImNvbGRfc3R1ZmYiOiLimIMiLCJleHAiOjIzNDU2NywianRpIjoiZGUxMmY0ZTY3MDY4NDI3ODg5ZjE1YWMyNzcwZGEwNTEifQ.aEoAYkSJjoWH1boshQAaTkf8G3yn0kapko6HFRt7Rh4"
+}</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-authentication-superuser-token-refresh">
+                            SuperUser Token Refresh
+                            <a href="#request-authentication-superuser-token-refresh"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-authentication-superuser-token-refresh-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-authentication-superuser-token-refresh-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-authentication-superuser-token-refresh-example-curl">
+                                    <pre><code class="hljs curl">curl -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{
+	"refresh":"sample_superuser_token"
+}' "http://localhost:8000/auth/token/refresh/"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-authentication-superuser-token-refresh-example-http">
+                                    <pre><code class="hljs http">POST /auth/token/refresh/ HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+{
+	"refresh":"sample_superuser_token"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                
+                                <li role="presentation" class="active">
+                                    <a href="#request-authentication-superuser-token-refresh-responses-a0f5d2be-ec6b-4f66-81e0-29c0ccb71337" data-toggle="tab">
+                                        
+                                            Response
+                                        
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                            <div class="tab-content">
+                                
+                                <div class="tab-pane active" id="request-authentication-superuser-token-refresh-responses-a0f5d2be-ec6b-4f66-81e0-29c0ccb71337">
+                                    <table class="table table-bordered">
+                                        <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                        
+                                        <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                        
+                                        
+                                            
+                                            <tr><td class="response-text-sample" colspan="2">
+                                                <pre><code>{
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNTY3LCJqdGkiOiJjNzE4ZTVkNjgzZWQ0NTQyYTU0NWJkM2VmMGI0ZGQ0ZSJ9.ekxRxgb9OKmHkfy-zs1Ro_xs1eMLXiR17dIDBVxeT-w"
+}</code></pre>
+                                            </td></tr>
+                                            
+                                        
+                                    </table>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+
+                        <hr>
+                    </div>
+                    
+
+                </div>
+                
+                
+                <div class="endpoints-group">
+                    <h3 id="folder-users">
+                        Users
+                        <a href="#folder-users"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div></div>
+
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-users-get-users-staff-only">
+                            Get Users (Staff only)
+                            <a href="#request-users-get-users-staff-only"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-users-get-users-staff-only-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-users-get-users-staff-only-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-users-get-users-staff-only-example-curl">
+                                    <pre><code class="hljs curl">curl -X GET -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer sample_staff_token" "http://localhost:8000/users?limit=10"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-users-get-users-staff-only-example-http">
+                                    <pre><code class="hljs http">GET /users?limit=10 HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer sample_staff_token</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+                        <hr>
+                    </div>
+                    
+                    
+                    <div class="request">
+
+                        <h4 id="request-users-get-user-details">
+                            Get user details
+                            <a href="#request-users-get-user-details"><i class="glyphicon glyphicon-link"></i></a>
+                        </h4>
+
+                        <div></div>
+
+                        <div>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li role="presentation" class="active"><a href="#request-users-get-user-details-example-curl" data-toggle="tab">Curl</a></li>
+                                <li role="presentation"><a href="#request-users-get-user-details-example-http" data-toggle="tab">HTTP</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="request-users-get-user-details-example-curl">
+                                    <pre><code class="hljs curl">curl -X GET -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Bearer sample_token" "http://localhost:8000/users/test_user_001"</code></pre>
+                                </div>
+                                <div class="tab-pane" id="request-users-get-user-details-example-http">
+                                    <pre><code class="hljs http">GET /users/test_user_001 HTTP/1.1
+Host: localhost:8000
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer sample_token</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+                        <hr>
+                    </div>
+                    
+
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("table:not(.table)").addClass('table table-bordered');
+    });
+
+    $(document).ready(function() {
+        allPanes = document.getElementsByClassName("tab-pane")
+        for(pane of allPanes){
+            if(pane.id.includes("http")){
+                pane.classList.add("active");
+            }
+            else if(pane.id.includes("curl")){
+                pane.classList.remove("active");
+            }
+
+            allTagPanes = document.getElementsByTagName("li");
+
+            curlTagPanes = [];
+            for(l of allTagPanes){
+                if (l.innerText=="Curl"){
+                    curlTagPanes.push(l);
+                }
+            }
+
+            httpTagPanes = [];
+            for(l of allTagPanes){
+                if (l.innerText=="HTTP"){
+                    httpTagPanes.push(l);
+                }
+            }
+
+            for(l of curlTagPanes){
+                l.classList.remove("active");
+            }
+
+            for(l of httpTagPanes){
+                l.classList.add("active");
+            }
+        }
+
+        // curlPane = document.getElementById("request-authentication-superuser-token-refresh-example-curl");
+
+        // curlPane.classList.remove("active");
+    });
+
+</script>
+</body>
+</html>

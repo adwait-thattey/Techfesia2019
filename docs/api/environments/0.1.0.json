@@ -1,0 +1,79 @@
+{
+	"id": "ea44c0e0-1217-4925-a9d2-ff6784fc9b66",
+	"name": "Techfesia2019",
+	"values": [
+		{
+			"key": "protocol",
+			"value": "http",
+			"enabled": true
+		},
+		{
+			"key": "host_name",
+			"value": "localhost:8000",
+			"enabled": true
+		},
+		{
+			"key": "username",
+			"value": "test_user_001",
+			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "Hello World",
+			"enabled": true
+		},
+		{
+			"key": "access_token",
+			"value": "sample_token",
+			"enabled": true
+		},
+		{
+			"key": "refresh_token",
+			"value": "sample_token",
+			"enabled": true
+		},
+		{
+			"key": "staff_username",
+			"value": "test_staff_user_001",
+			"enabled": true
+		},
+		{
+			"key": "staff_password",
+			"value": "Hello Staff Password",
+			"enabled": true
+		},
+		{
+			"key": "staff_access_token",
+			"value": "sample_staff_token",
+			"enabled": true
+		},
+		{
+			"key": "staff_refresh_token",
+			"value": "sample_staff_token",
+			"enabled": true
+		},
+		{
+			"key": "superuser_username",
+			"value": "sample_superuser_001",
+			"enabled": true
+		},
+		{
+			"key": "superuser_password",
+			"value": "Hello Superuser Password",
+			"enabled": true
+		},
+		{
+			"key": "superuser_access_token",
+			"value": "sample_superuser_token",
+			"enabled": true
+		},
+		{
+			"key": "superuser_refresh_token",
+			"value": "sample_superuser_token",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2019-06-02T08:59:13.693Z",
+	"_postman_exported_using": "Postman/7.1.1"
+}
