@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>Hacker-Blog</title>
+ <link href="/hacker-blog/atom.xml" rel="self"/>
+ <id>/hacker-blog</id>
+ <updated>2018-01-06T13:32:47+00:00</updated>
+ <author>
+   <name>SomeHacker</name>
+   <uri>https://ashishchaudhary.in/hacker-blog</uri>
+   <email>someone@somewebsite.somedomain</email>
+ </author>
+
+ 
+
+ <entry>
+   <title>Yet Another Sample Page</title>
+   <link href="/hacker-blog/Yet-Another-Sample-Page"/>
+   <id>/hacker-blog/Yet-Another-Sample-Page</id>
+   <updated>2018-01-06T00:00:00+00:00</updated>
+   <content type="html">&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, &lt;del&gt;strikethrough&lt;/del&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;keyword&lt;/code&gt;.&lt;/p&gt; &lt;p&gt;&lt;a href=&quot;another-page&quot;&gt;Link to another page&lt;/a&gt;.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.&lt;/p&gt; &lt;h1 id=&quot;header-1&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Header 1&lt;/h1&gt; &lt;p&gt;This is a normal paragraph following a...</content>
+ </entry>
+
+ 
+
+ <entry>
+   <title>Sample Page</title>
+   <link href="/hacker-blog/Sample-Page"/>
+   <id>/hacker-blog/Sample-Page</id>
+   <updated>2017-12-12T00:00:00+00:00</updated>
+   <content type="html">&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, &lt;del&gt;strikethrough&lt;/del&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;keyword&lt;/code&gt;.&lt;/p&gt; &lt;p&gt;&lt;a href=&quot;another-page&quot;&gt;Link to another page&lt;/a&gt;.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.&lt;/p&gt; &lt;h1 id=&quot;header-1&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Header 1&lt;/h1&gt; &lt;p&gt;This is a normal paragraph following a...</content>
+ </entry>
+
+ 
+
+ <entry>
+   <title>One More Sample Page</title>
+   <link href="/hacker-blog/One-More-Sample-Page"/>
+   <id>/hacker-blog/One-More-Sample-Page</id>
+   <updated>2017-12-11T00:00:00+00:00</updated>
+   <content type="html">&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, &lt;del&gt;strikethrough&lt;/del&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;keyword&lt;/code&gt;.&lt;/p&gt; &lt;p&gt;&lt;a href=&quot;another-page&quot;&gt;Link to another page&lt;/a&gt;.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.&lt;/p&gt; &lt;h1 id=&quot;header-1&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Header 1&lt;/h1&gt; &lt;p&gt;This is a normal paragraph following a...</content>
+ </entry>
+
+ 
+
+ <entry>
+   <title>Another Sample Page</title>
+   <link href="/hacker-blog/Another-Sample-Page"/>
+   <id>/hacker-blog/Another-Sample-Page</id>
+   <updated>2017-12-10T00:00:00+00:00</updated>
+   <content type="html">&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, &lt;del&gt;strikethrough&lt;/del&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;keyword&lt;/code&gt;.&lt;/p&gt; &lt;p&gt;&lt;a href=&quot;another-page&quot;&gt;Link to another page&lt;/a&gt;.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs.&lt;/p&gt; &lt;p&gt;There should be whitespace between paragraphs. We recommend including a README, or a file with information about your project.&lt;/p&gt; &lt;h1 id=&quot;header-1&quot;&gt;&lt;a href=&quot;#header-1&quot;&gt;&lt;/a&gt;Header 1&lt;/h1&gt; &lt;p&gt;This is a normal paragraph following a...</content>
+ </entry>
+
+ 
+
+</feed>
