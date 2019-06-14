@@ -31,5 +31,5 @@ coveralls
 notifications:
   slack:
     rooms:
-	  - techfesia2019:SSfS1f2fF9x676ViRFipIpe7#general
-	  - techfesia2019:SSfS1f2fF9x676ViRFipIpe7#random
+	- techfesia2019:SSfS1f2fF9x676ViRFipIpe7#general
+	- techfesia2019:SSfS1f2fF9x676ViRFipIpe7#random
