@@ -15,9 +15,7 @@ install:
   - pip3 install coveralls
   
 before_script:
-  - cd backend
-  #- docker pull coderdude/ase1:v1
-  #- docker tag coderdude/ase1:v1 pybuntu
+  - cd backend/Techfesia2019
   - python manage.py makemigrations
   - python manage.py migrate
 
