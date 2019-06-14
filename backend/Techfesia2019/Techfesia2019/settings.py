@@ -14,7 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
-
+import firebase_admin
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -206,8 +206,15 @@ EMAIL_HOST_USER = "apikey"
 EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 PUBLIC_ID_LENGTH = 10
 
+FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR,"Techfesia2019", "fake_creds.json")
+
 # Override all settings with local settings
 try:
     from .local_settings import *
 except:
     pass
+
+
+#initialize firebase
+FIREBASE_CREDENTIALS = firebase_admin.credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
+default_app = firebase_admin.initialize_app(FIREBASE_CREDENTIALS)

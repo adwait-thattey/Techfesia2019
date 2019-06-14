@@ -110,3 +110,7 @@ venv.bak/
 .code/
 .atom/
 .sublime/
+
+
+# credentials
+secret_credentials/
