@@ -1,5 +1,10 @@
 language: python
 
+sudo: required
+
+services:
+  - docker
+
 python:
   - 3.6
 
@@ -7,25 +12,22 @@ env:
   - DJANGO=2.1.2
 
 install:
-  - pip3 install -r requirements.txt
+  - pip3 install -r backend/requirements.txt
   - pip3 install coveralls
 
 before_script:
+  - cd backend/Techfesia2019
+  - python manage.py check
   - python manage.py makemigrations
   - python manage.py migrate
 
 script:
-  - python manage.py check
-  - coverage run --source="base, registration, accounts, posts" manage.py test
+  - coverage run --source=main_page,questions,registration manage.py test
 
 after_success:
-  coveralls  
-
+  - coveralls  
 
 notifications:
-  email:
-    recipients:
-      - coderdude1999@gmail.com
-
-    on_success: change
-    on_failure: always
+  slack:
+    rooms:
+        - techfesia2019:SSfS1f2fF9x676ViRFipIpe7#repo_integrations
