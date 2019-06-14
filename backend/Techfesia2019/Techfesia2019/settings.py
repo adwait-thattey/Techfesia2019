@@ -15,8 +15,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
 import firebase_admin
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -28,7 +28,6 @@ SECRET_KEY = '6x$h&=^k!^3(t7*#e$a166ner+bl15evghybyicd7=6!jvq7o@'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -82,7 +81,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Techfesia2019.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -92,7 +90,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -134,18 +131,18 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     # ]
-        'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': (
 
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
 
-#simple jwt settings
+# simple jwt settings
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 
@@ -163,14 +160,14 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 
 }
-#Swagger Settings
+# Swagger Settings
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         "api_key": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
 }
@@ -179,7 +176,7 @@ SWAGGER_SETTINGS = {
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 
-#login logout config
+# login logout config
 LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
 
@@ -193,7 +190,6 @@ STATICFILES_DIRS = [
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-
 # sendgrid
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 SENDGRID_API_KEY = "fake.api.key"
@@ -206,7 +202,7 @@ EMAIL_HOST_USER = "apikey"
 EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 PUBLIC_ID_LENGTH = 10
 
-FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR,"Techfesia2019", "fake_creds.json")
+FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, "Techfesia2019", "fake_creds.json")
 
 # Override all settings with local settings
 try:
@@ -214,7 +210,6 @@ try:
 except:
     pass
 
-
-#initialize firebase
+# initialize firebase
 FIREBASE_CREDENTIALS = firebase_admin.credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
 default_app = firebase_admin.initialize_app(FIREBASE_CREDENTIALS)
