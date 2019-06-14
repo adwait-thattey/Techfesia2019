@@ -118,3 +118,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+SENDGRID_API_KEY = "fake.api.key"
+
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "apikey"
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+PUBLIC_ID_LENGTH = 10
+
+# Override all settings with local settings
+try:
+    from .local_settings import *
+except:
+    pass
