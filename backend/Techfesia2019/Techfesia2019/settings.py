@@ -49,7 +49,14 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # custom apps
-    'registration'
+    'base',
+    'registration',
+    'events',
+    'accounts',
+    'blog',
+    'etc',
+    'management'
+
 ]
 
 MIDDLEWARE = [
