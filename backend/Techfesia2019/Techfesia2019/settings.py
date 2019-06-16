@@ -194,10 +194,10 @@ LOGOUT_URL = 'rest_framework:logout'
 
 # static media dirs
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    # '/var/www/static/', # to be used with nginx
-]
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, "static"),
+#    # '/var/www/static/', # to be used with nginx
+#]
 
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
 
