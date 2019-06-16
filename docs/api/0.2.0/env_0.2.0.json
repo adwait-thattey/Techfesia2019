@@ -1,0 +1,109 @@
+{
+	"id": "16d365d0-755e-4e31-8205-a74c547dbcbb",
+	"name": "Techfesia2019",
+	"values": [
+		{
+			"key": "protocol",
+			"value": "http",
+			"enabled": true
+		},
+		{
+			"key": "host_name",
+			"value": "localhost:8000",
+			"enabled": true
+		},
+		{
+			"key": "username",
+			"value": "test_user_001",
+			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "Hello World",
+			"enabled": true
+		},
+		{
+			"key": "access_token",
+			"value": "sample_token",
+			"enabled": true
+		},
+		{
+			"key": "refresh_token",
+			"value": "sample_token",
+			"enabled": true
+		},
+		{
+			"key": "staff_username",
+			"value": "test_staff_user_001",
+			"enabled": true
+		},
+		{
+			"key": "staff_password",
+			"value": "Hello Staff Password",
+			"enabled": true
+		},
+		{
+			"key": "staff_access_token",
+			"value": "sample_staff_token",
+			"enabled": true
+		},
+		{
+			"key": "staff_refresh_token",
+			"value": "sample_staff_token",
+			"enabled": true
+		},
+		{
+			"key": "superuser_username",
+			"value": "sample_superuser_001",
+			"enabled": true
+		},
+		{
+			"key": "superuser_password",
+			"value": "Hello Superuser Password",
+			"enabled": true
+		},
+		{
+			"key": "superuser_access_token",
+			"value": "sample_superuser_token",
+			"enabled": true
+		},
+		{
+			"key": "superuser_refresh_token",
+			"value": "sample_superuser_token",
+			"enabled": true
+		},
+		{
+			"key": "event_id",
+			"value": "sample_event_id",
+			"enabled": true
+		},
+		{
+			"key": "category_name",
+			"value": "sample_category_name",
+			"enabled": true
+		},
+		{
+			"key": "tags_name",
+			"value": "sample_tags_name",
+			"enabled": true
+		},
+		{
+			"key": "team_id",
+			"value": "sample_team_id",
+			"enabled": true
+		},
+		{
+			"key": "ticket_id",
+			"value": "sample_ticket_id",
+			"enabled": true
+		},
+		{
+			"key": "registration_id",
+			"value": "sample_registration_id",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2019-06-16T07:16:07.627Z",
+	"_postman_exported_using": "Postman/7.2.0"
+}
