@@ -18,16 +18,23 @@ import firebase_admin
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# try importing local settings lse use public settings
+
+try:
+    from . import local_settings as external_settings
+except:
+    from . import public_settings as external_settings
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '6x$h&=^k!^3(t7*#e$a166ner+bl15evghybyicd7=6!jvq7o@'
+SECRET_KEY = external_settings.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = external_settings.DEBUG
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = external_settings.ALLOWED_HOSTS
 
 # Application definition
 
@@ -93,12 +100,7 @@ WSGI_APPLICATION = 'Techfesia2019.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+DATABASES = external_settings.DATABASES
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -136,23 +138,19 @@ USE_TZ = True
 
 # Rest Framework
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    # ]
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
 
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-
+        # session auth must come after jwt auth to ensure correct status codes are sent back
     )
 }
 
 # simple jwt settings
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': DEBUG and timedelta(minutes=100) or timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -213,23 +211,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # sendgrid
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-SENDGRID_API_KEY = "fake.api.key"
+SENDGRID_API_KEY = external_settings.SENDGRID_API_KEY
 
-EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_BACKEND = external_settings.EMAIL_BACKEND
+EMAIL_HOST = external_settings.EMAIL_BACKEND
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "apikey"
+EMAIL_USE_TLS = external_settings.EMAIL_USE_TLS
+EMAIL_HOST_USER = external_settings.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
-PUBLIC_ID_LENGTH = 10
+PUBLIC_ID_LENGTH = external_settings.PUBLIC_ID_LENGTH
 
-FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, "Techfesia2019", "fake_creds.json")
+FIREBASE_CREDENTIALS_PATH = external_settings.FIREBASE_CREDENTIALS_PATH
 
-# Override all settings with local settings
-try:
-    from .local_settings import *
-except:
-    pass
 
 # initialize firebase
 FIREBASE_CREDENTIALS = firebase_admin.credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
