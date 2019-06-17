@@ -22,8 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from . import local_settings as external_settings
+    print("Using local settings")
 except:
     from . import public_settings as external_settings
+    print("using public settings")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
