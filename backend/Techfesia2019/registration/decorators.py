@@ -15,8 +15,8 @@ def is_user_calling_self(func):
     def checker(request, *args, **kwargs):
         username = kwargs['username']
         user = get_object_or_404(User, username=username)
-        if (not request.user.is_staff):
-            if (request.user != user):
+        if not request.user.is_staff:
+            if request.user != user:
                 return Response(status=status.HTTP_403_FORBIDDEN,
                                 data={"message": "You do not have permission to perform this action"})
 
