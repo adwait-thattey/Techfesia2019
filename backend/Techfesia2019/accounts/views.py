@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from base.utils import account_activation_token
+from accounts.utils import account_activation_token, send_account_activation_email
 from registration.decorators import is_user_calling_self
 from registration.models import User
 
@@ -37,6 +37,21 @@ class EmailConfirmed(APIView):
         #                         data={"message": "You do not have permission to perform this action"})
 
         return Response(status=status.HTTP_200_OK, data={"email_confirmed": user.email_confirmed})
+
+
+    @method_decorator(is_user_calling_self)
+    def post(self, request, username):
+        """
+            Send account activation email to user
+        """
+
+        user = get_object_or_404(User, username=username)
+
+        if user.email_confirmed:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={"message":"Your account email is already confirmed"})
+
+        send_account_activation_email(request, user)
+        return Response(status=status.HTTP_200_OK, data={"message":"Account Confirmation email will be sent shortly "})
 
 
 

@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.sites.shortcuts import get_current_site
 from django.db import connection
 from django.template.loader import render_to_string
 from django.utils import six
@@ -18,12 +19,12 @@ account_activation_token = AccountActivationTokenGenerator()
 
 @run_in_background
 def send_account_activation_email(request, user_instance):
-    # current_site = get_current_site(request)
+    current_site = get_current_site(request)
     email_subject = "Activate Your TechFesia2k18 Account "
     email_message = render_to_string('accounts/email_templates/account_activation_email_template.html',
                                      {'user_fullname': user_instance.get_full_name(),
                                       'username':user_instance.username,
-                                      'domain': 'localhost:8000',
+                                      'domain': current_site.domain,
                                       'uid': urlsafe_base64_encode(force_bytes(user_instance.pk)),
                                       'token': account_activation_token.make_token(
                                           user_instance),
