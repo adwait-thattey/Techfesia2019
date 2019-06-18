@@ -5,7 +5,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework_simplejwt.views import TokenViewBase
 
+from registration import serializers
 from registration.models import User
 
 
@@ -23,3 +25,12 @@ class Hello(APIView):
 
 
 
+class FirebaseTokenObtainPairView(TokenViewBase):
+    """
+    Takes a set of user credentials and returns an access and refresh JSON web
+    token pair to prove the authentication of those credentials.
+    """
+    serializer_class = serializers.FirebaseTokenObtainPairSerializer
+
+
+firebase_token_obtain_pair = FirebaseTokenObtainPairView.as_view()

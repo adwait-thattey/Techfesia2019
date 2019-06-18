@@ -1,60 +1,85 @@
+from django.shortcuts import get_object_or_404
 from firebase_admin import auth
 from rest_framework import serializers
+from rest_framework import exceptions as rest_exceptions
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from django.utils.translation import ugettext_lazy as _
+from django.utils.six import text_type
+
 
 from registration.models import User, FirebaseUser
+from registration.utils import FirebaseUtils
 
 
 class FirebaseUserSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=100)
+    """
+        This serializer takes email_id and uid as param.
+        Confirms authentication.
+        If user or his firebase account does not exist, then will create it
+    """
+    email = serializers.EmailField()
     uid = serializers.CharField(max_length=100)
 
     def validate(self, data):
         # print("Hello")
-        user = User.objects.filter(username=data['username'])
-        if not user.exists():
-            raise serializers.ValidationError("This user does not exist!")
+        try:
+            user_from_firebase = FirebaseUtils.check_firebase_credentials(email=data['email'], uid=data['uid'])
+            data['firebase_user'] = user_from_firebase
+        except serializers.ValidationError:
+            # remap all validation errors to auth failed error
+            raise rest_exceptions.AuthenticationFailed()
 
-        user = user[0]
+        user = User.objects.filter(email=data['email']).first()
+        if user:
+            # User exists, Go to next step
+            data['user'] = user
+        else:
+            # User does not exist
+            # create new user
 
-        data['user'] = user
+            user = User.objects.create_user(
+                            email=data['email'],
+                            username=data['email'].split('@')[0],
+                            first_name = user_from_firebase.display_name.split(' ')[0],
+                            last_name = user_from_firebase.display_name.split(' ')[1]
+            )
+
+            # User has been created. Proceed to next step
+            data['user'] = user
 
         return data
 
-    def perform_firebase_auth(self, validated_data):
+
+
+    def create_or_update_firebase_account(self, validated_data):
         user = validated_data['user']
-        try:
-            firebase_user = auth.get_user(validated_data['uid'])
-        except auth.AuthError:
-            print(validated_data['uid'])
-            raise serializers.ValidationError("Invalid uid or No user found with the given uid")
+        user_from_firebase = validated_data['firebase_user']
 
-        except:
-            raise serializers.ValidationError(
-                "We were unable to verify the credentials from sources. Please try again Later! ")
-
-        if firebase_user.email != user.email:
-            raise serializers.ValidationError("uid mismatch!")
-
-        if hasattr(user,'firebaseuser'):
-            user.firebaseuser.uid = validated_data['uid']
+        if hasattr(user, "firebaseuser"):
+            # Account already exists for user. Update details
+            user.firebaseuser.uid = user_from_firebase.uid
+            user.firebaseuser.save()
+            fu = user.firebaseuser
         else:
-            FirebaseUser.objects.create(user=user, uid=validated_data['uid'])
+            # create firebase Account for user
 
-        try:
-            user.firebaseuser.profile_pic_url = firebase_user.photo_url
-        except:
-            # No photo is attached!
-            pass
+            fu = FirebaseUser.objects.create(user=user, uid=user_from_firebase.uid)
 
-        user.firebaseuser.save()
+            try:
+                fu.profile_pic_url = user_from_firebase.photo_url
+                fu.save()
+            except:
+                # profile pic does not exist
+                pass
 
-        return user.firebaseuser
+        return fu
 
     def create(self, validated_data):
-        return self.perform_firebase_auth(validated_data)
+        return self.create_or_update_firebase_account(validated_data)
 
     def update(self, instance, validated_data):
-        return self.perform_firebase_auth(validated_data)
+        return self.create_or_update_firebase_account(validated_data)
 
 
 class FirebaseTokenObtainSerializer(serializers.Serializer):
@@ -73,23 +98,33 @@ class FirebaseTokenObtainSerializer(serializers.Serializer):
         uid = attrs['uid']
 
         try:
-            firebase_user = auth.get_user(uid)
-            if firebase_user.email != email:
-                print(firebase_user.email, email)
-                raise serializers.ValidationError(
-                    _('Invalid Credentials'),
-                )
-            self.user = User.objects.get(email=email)
-        except serializers.ValidationError:
-            raise serializers.ValidationError(
-                _('No active account found with the given credentials'),
-            )
+            user = User.objects.filter(email=email).first()
+            firebase_user = FirebaseUser.objects.filter(uid=uid).first()
 
-        except User.DoesNotExist:
-            raise serializers.ValidationError(
-                _(
-                    'Currently no account exists. First create an account with the given email. Then try to attach firebase')
-            )
+            if  user and hasattr(user, 'firebaseuser'):
+                if user.firebaseuser.uid == uid:
+                    # User credentials validated
+                    self.user = firebase_user.user
+
+                else:
+                    # uid did not match
+                    # This means that either credentials are bad or data on db is not latest firebase data
+                    # Contact firebase again and try to get latest details
+                    user_from_firebase = FirebaseUtils.check_firebase_credentials(email=user.email, uid=uid)
+
+                    # user validated
+                    user.firebaseuser.uid = uid
+                    user.firebaseuser.save()
+                    self.user = user
+            else:
+                # User does not exist or his firebase account does not exist
+                raise serializers.ValidationError("This user does not exist or firebase account does not exist")
+
+        # catch all validation errors and simply reply with Auth Failed error
+        except serializers.ValidationError:
+
+            raise rest_exceptions.AuthenticationFailed()
+
         return {}
 
     def update(self, instance, validated_data):
