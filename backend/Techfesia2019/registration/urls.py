@@ -9,5 +9,5 @@ urlpatterns = [
     path('token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('hello', views.Hello.as_view(), name="hello"),
-    path('firetoken', views.FirebaseTokenObtainPairView.as_view(), name='firebase_token_obtain_pair'),
+    path('firetoken', views.FirebaseAuthenticationView.as_view(), name='firebase_token_obtain_pair'),
 ]

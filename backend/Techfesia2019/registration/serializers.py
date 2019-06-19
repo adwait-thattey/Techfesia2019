@@ -40,10 +40,13 @@ class FirebaseUserSerializer(serializers.Serializer):
 
             user = User.objects.create_user(
                             email=data['email'],
-                            username=data['email'].split('@')[0],
-                            first_name = user_from_firebase.display_name.split(' ')[0],
-                            last_name = user_from_firebase.display_name.split(' ')[1]
+                            username=data['email'].split('@')[0]
             )
+
+            if user_from_firebase.display_name:
+                user.first_name = user_from_firebase.display_name.split(' ')[0],
+                user.last_name = user_from_firebase.display_name.split(' ')[1]
+                user.save()
 
             # User has been created. Proceed to next step
             data['user'] = user
@@ -99,12 +102,11 @@ class FirebaseTokenObtainSerializer(serializers.Serializer):
 
         try:
             user = User.objects.filter(email=email).first()
-            firebase_user = FirebaseUser.objects.filter(uid=uid).first()
 
-            if  user and hasattr(user, 'firebaseuser'):
+            if user and hasattr(user, 'firebaseuser'):
                 if user.firebaseuser.uid == uid:
                     # User credentials validated
-                    self.user = firebase_user.user
+                    self.user = user
 
                 else:
                     # uid did not match

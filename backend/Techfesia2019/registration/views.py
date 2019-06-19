@@ -24,6 +24,29 @@ class Hello(APIView):
         return Response(status=status.HTTP_200_OK, data={"message": "POST Hello"})
 
 
+class FirebaseAuthenticationView(APIView):
+    """
+    Takes email and uid.
+    Verifies from firebase.
+    If user does not exist, creates user.
+    Finally provides token
+    """
+
+    def post(self, request):
+        email = request.data.get('email')
+
+        user_obj = User.objects.filter(email=email).first()
+
+        if not (user_obj and user_obj.firebaseuser):
+            sr = serializers.FirebaseUserSerializer(data=request.data)
+            if sr.is_valid():
+                sr.save()
+
+        token_sr = serializers.FirebaseTokenObtainPairSerializer(data=request.data)
+
+        if token_sr.is_valid():
+            return Response(status=status.HTTP_200_OK, data=token_sr.data)
+
 
 class FirebaseTokenObtainPairView(TokenViewBase):
     """
