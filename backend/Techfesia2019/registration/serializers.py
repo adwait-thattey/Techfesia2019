@@ -141,12 +141,19 @@ class FirebaseTokenObtainPairSerializer(FirebaseTokenObtainSerializer):
     def get_token(cls, user):
         return RefreshToken.for_user(user)
 
+    @classmethod
+    def get_token_object(cls, user):
+        refresh_token_object = cls.get_token(user)
+
+        obj = {
+            "refresh": text_type(refresh_token_object),
+            "access": text_type(refresh_token_object.access_token)
+        }
+
+        return obj
     def validate(self, attrs):
         data = super(FirebaseTokenObtainPairSerializer, self).validate(attrs)
 
-        refresh = self.get_token(self.user)
+        token_obj = self.get_token_object(self.user)
 
-        data['refresh'] = text_type(refresh)
-        data['access'] = text_type(refresh.access_token)
-
-        return data
+        return token_obj
