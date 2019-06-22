@@ -22,8 +22,9 @@ class Team(models.Model):
 
     create_date = models.DateTimeField(auto_now_add=True)
 
-    def team_members(self):
-        pass
+    @property
+    def member_count(self):
+        return self.teammember_set.filter(invitation_accepted=True).count()
 
     def save(self, *args, **kwargs):
         if not self.public_id:
