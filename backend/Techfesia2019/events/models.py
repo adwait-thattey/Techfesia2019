@@ -55,20 +55,15 @@ class Event(models.Model):
 
     team_event = models.BooleanField(default=False)
 
-
     category = models.ManyToManyField(Category, related_name='events')
 
     tags = models.ManyToManyField(Tags, related_name='events')
 
-    # min_participants = models.IntegerField(default=2)
-    # max_participants = models.IntegerField(default=20)
-    # min_team_size = models.IntegerField(default=1)
-    # max_team_size = models.IntegerField(default=1)
-    #
     participants_waiting_list = models.ManyToManyField(Team, related_name='waiting_list_events')
 
-    # def is_single_event(self):
-    #     return self.max_participants == 1
+    max_participants = models.IntegerField(default=20)
+
+    reserved_slots = models.IntegerField(default=0, help_text="No of participant slots reserved for external players")
 
     @property
     def current_participants(self):
@@ -80,3 +75,11 @@ class Event(models.Model):
 
         super().save(*args, **kwargs)
 
+
+class SoloEvent(Event):
+    pass
+
+
+class TeamEvent(Event):
+    min_team_size = models.IntegerField(default=1)
+    max_team_size = models.IntegerField(default=1)
