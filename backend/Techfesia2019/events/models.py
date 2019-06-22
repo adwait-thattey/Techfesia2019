@@ -36,7 +36,7 @@ class Event(models.Model):
                                  blank=True
                                  )
 
-    description = models.CharField(max_length=1000,
+    description = models.TextField(max_length=1000,
                                    null=True,
                                    blank=True
                                    )
@@ -64,10 +64,6 @@ class Event(models.Model):
     max_participants = models.IntegerField(default=20)
 
     reserved_slots = models.IntegerField(default=0, help_text="No of participant slots reserved for external players")
-
-    @property
-    def current_participants(self):
-        return self.participants.count()
 
     def save(self, *args, **kwargs):
         if not self.public_id:
