@@ -36,8 +36,7 @@ class Event(models.Model):
                                  blank=True
                                  )
 
-    description = models.TextField(max_length=1000,
-                                   null=True,
+    description = models.TextField(null=True,
                                    blank=True
                                    )
 
