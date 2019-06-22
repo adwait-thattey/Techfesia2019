@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'registration',
     'events',
     'accounts',
+    'event_registrations',
     'blog',
     'etc',
     'management'
