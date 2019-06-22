@@ -24,7 +24,7 @@ class Event(models.Model):
     event_logo = models.URLField()
     description = models.CharField(max_length=1000)
     # description = models.JsonField()
-    date = models.DateField(default=datetime.date(1, 1, 2000))
+    date = models.DateField(default=datetime.date(2000, 1, 1))
     time = models.TimeField(default=datetime.time(12, 0, 0))
     venue = models.CharField(max_length=100)
     min_team_size = models.IntegerField(default=1)
