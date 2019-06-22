@@ -2,7 +2,7 @@ from django.db import models
 import datetime
 
 # Create your models here.
-from base.utils import generate_random_string
+from base.utils import generate_random_string, generate_public_id
 
 
 class Team(models.Model):
@@ -18,26 +18,57 @@ class Tags(models.Model):
 
 
 class Event(models.Model):
-    public_id = models.CharField(max_length=100, unique=True, blank=True)
-    title = models.CharField(max_length=100, unique=True)
-    event_picture = models.URLField(null=True)
-    event_logo = models.URLField(null=True)
-    description = models.CharField(max_length=1000, default='')
-    # description = models.JsonField()
-    date = models.DateField(default=datetime.date(2000, 1, 1))
-    time = models.TimeField(default=datetime.time(12, 0, 0))
-    venue = models.CharField(max_length=100, default='')
-    min_team_size = models.IntegerField(default=1)
-    max_team_size = models.IntegerField(default=1)
-    participants = models.ManyToManyField(Team, related_name='participated_events')
+    public_id = models.CharField(max_length=100,
+                                 unique=True,
+                                 blank=True,
+                                 db_index=True
+                                 )
+
+    title = models.CharField(max_length=100,
+                             unique=True
+                             )
+
+    event_picture = models.URLField(null=True,
+                                    blank=True
+                                    )
+
+    event_logo = models.URLField(null=True,
+                                 blank=True
+                                 )
+
+    description = models.CharField(max_length=1000,
+                                   null=True,
+                                   blank=True
+                                   )
+
+    start_date = models.DateField()
+
+    start_time = models.TimeField()
+
+    end_date = models.DateField()
+
+    end_time = models.TimeField()
+
+    venue = models.CharField(max_length=100,
+                             default='to be determined'
+                             )
+
+    team_event = models.BooleanField(default=False)
+
+
     category = models.ManyToManyField(Category, related_name='events')
+
     tags = models.ManyToManyField(Tags, related_name='events')
-    min_participants = models.IntegerField(default=2)
-    max_participants = models.IntegerField(default=20)
+
+    # min_participants = models.IntegerField(default=2)
+    # max_participants = models.IntegerField(default=20)
+    # min_team_size = models.IntegerField(default=1)
+    # max_team_size = models.IntegerField(default=1)
+    #
     participants_waiting_list = models.ManyToManyField(Team, related_name='waiting_list_events')
 
-    def is_single_event(self):
-        return self.max_participants == 1
+    # def is_single_event(self):
+    #     return self.max_participants == 1
 
     @property
     def current_participants(self):
@@ -45,7 +76,7 @@ class Event(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.public_id:
-            self.public_id = generate_random_string()
+            self.public_id = generate_public_id(self)
 
         super().save(*args, **kwargs)
 
