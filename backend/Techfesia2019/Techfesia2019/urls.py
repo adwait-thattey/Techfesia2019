@@ -24,5 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('docs', schema_view),
     path('auth/', include("registration.urls")),
+    path('users/', include("accounts.urls")),
     path('rest/', include('rest_framework.urls', namespace='rest_framework'))
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
