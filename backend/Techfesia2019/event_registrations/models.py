@@ -118,8 +118,8 @@ class TeamEventRegistration(models.Model):
         if self.is_complete is False and self.is_confirmed is True:
             raise ValidationError(_("Registration can not be confirmed until it is complete"))
 
-       #TODO: A check required that ensures no team member is an organizer/volunteer for same event
-       # Doing it here however might be too expensive
+    # TODO: A check required that ensures no team member is an organizer/volunteer for same event
+    # Doing it here however might be too expensive
 
     def save(self, *args, **kwargs):
         if not self.public_id:
