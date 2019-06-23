@@ -1,8 +1,12 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 # Create your models here.
 from accounts.models import Profile
 from base.utils import generate_public_id
+from django.utils.translation import gettext_lazy as _
+
+from events.models import Event
 
 
 class Team(models.Model):
@@ -43,3 +47,44 @@ class TeamMember(models.Model):
                                               )
 
     joined_on = models.DateTimeField(auto_now=True)
+
+
+class SoloEventRegistration(models.Model):
+    public_id = models.CharField(max_length=100,
+                                 unique=True,
+                                 blank=True,
+                                 db_index=True)
+
+    event = models.ForeignKey(to=Event, on_delete=models.PROTECT)
+
+    profile = models.ForeignKey(to=Profile, on_delete=models.CASCADE)
+
+    is_complete = models.BooleanField(default=False,
+                                      help_text="Tells whether user has completed all formalities like payments etc."
+                                      )
+
+    is_confirmed = models.BooleanField(default=False,
+                                       help_text="Tells whether registration is confirmed or is in waiting"
+                                       )
+
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    updated_on = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if self.is_complete is False and self.is_confirmed is True:
+            raise ValidationError(_("Registration can not be confirmed until it is complete"))
+
+        if hasattr(self.profile, 'profileorganizer'):
+
+           if self.profile.profileorganizer in  self.event.organizers.all():
+                pass
+
+        event_volunteers = self.event.volunteers.all()
+
+
+    def save(self, *args, **kwargs):
+        if not self.public_id:
+            self.public_id = generate_public_id(self)
+
+        super().save(*args, **kwargs)
