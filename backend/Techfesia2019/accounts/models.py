@@ -2,7 +2,7 @@ from django.core.validators import MinLengthValidator
 from django.db import models
 
 # Create your models here.
-from events.models import Event
+from events.models import Event, SoloEvent
 from registration.models import User
 
 
@@ -13,9 +13,15 @@ class Profile(models.Model):
     college_name = models.CharField(max_length=150)
 
 
-class ProfileOrganizer(Profile):
+class ProfileParticipant(models.Model):
+    profile = models.OneToOneField(to=Profile, on_delete=models.CASCADE)
+
+
+class ProfileOrganizer(models.Model):
+    profile = models.OneToOneField(to=Profile, on_delete=models.CASCADE)
     events = models.ManyToManyField(to=Event, related_name="organizers")
 
 
-class ProfileVolunteer(Profile):
+class ProfileVolunteer(models.Model):
+    profile = models.OneToOneField(to=Profile, on_delete=models.CASCADE)
     events = models.ManyToManyField(to=Event, related_name="volunteers")
