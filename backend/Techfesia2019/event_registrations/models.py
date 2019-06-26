@@ -6,7 +6,7 @@ from accounts.models import Profile
 from base.utils import generate_public_id
 from django.utils.translation import gettext_lazy as _
 
-from events.models import Event
+from events.models import SoloEvent, TeamEvent
 
 
 class Team(models.Model):
@@ -55,7 +55,7 @@ class SoloEventRegistration(models.Model):
                                  blank=True,
                                  db_index=True)
 
-    event = models.ForeignKey(to=Event, on_delete=models.PROTECT)
+    event = models.ForeignKey(to=SoloEvent, on_delete=models.PROTECT)
 
     profile = models.ForeignKey(to=Profile, on_delete=models.CASCADE)
 
@@ -98,7 +98,7 @@ class TeamEventRegistration(models.Model):
                                  blank=True,
                                  db_index=True)
 
-    event = models.ForeignKey(to=Event, on_delete=models.PROTECT)
+    event = models.ForeignKey(to=TeamEvent, on_delete=models.PROTECT)
 
     team = models.ForeignKey(to=Team, on_delete=models.CASCADE)
 
