@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Team
+from .models import Team, SoloEventRegistration, TeamEventRegistration, TeamMember
 
 
 class TeamSerializer(serializers.ModelSerializer):
@@ -14,3 +14,12 @@ class TeamSerializer(serializers.ModelSerializer):
 
     def is_valid(self, raise_exception=False):
         return super().is_valid()
+
+
+class TeamMemberSerializer(serializers.ModelSerializer):
+    profile = serializers.SlugRelatedField(read_only=True, slug_field='get_user_username')
+    team = serializers.SlugRelatedField(read_only=True, slug_field='public_id')
+
+    class Meta:
+        model = TeamMember
+        fields = ['team', 'profile', 'invitation_accepted']
