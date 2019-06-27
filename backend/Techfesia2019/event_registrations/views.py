@@ -21,3 +21,9 @@ class TeamDetailView(APIView):
         return Response(serializer.data)
 
 
+class TeamListView(APIView):
+    def get(self, request, format=None):
+        teams = Team.objects.all()
+        serializer = TeamSerializer(teams, many=True)
+        return Response(serializer.data)
+
