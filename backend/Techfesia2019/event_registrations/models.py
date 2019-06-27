@@ -119,7 +119,7 @@ class TeamEventRegistration(models.Model):
     team = models.ForeignKey(to=Team, on_delete=models.CASCADE, related_name='events')
 
     is_complete = models.BooleanField(default=False,
-                                      help_text="Tells whether the team has completed all formalities like payments etc."
+                                      help_text="Tells whether a team has completed all formalities like payments etc."
                                       )
 
     is_confirmed = models.BooleanField(default=False,
