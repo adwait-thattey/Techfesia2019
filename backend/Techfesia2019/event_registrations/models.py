@@ -27,6 +27,14 @@ class Team(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
 
     @property
+    def leader(self):
+        return self.team_leader.user
+
+    @property
+    def members(self):
+        return self.teammember_set.filter(invitation_accepted=True)
+
+    @property
     def invitees(self):
         return self.teammember_set.filter(invitation_accepted=False)
 
