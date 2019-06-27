@@ -27,6 +27,10 @@ class Team(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
 
     @property
+    def invitees(self):
+        return self.teammember_set.filter(invitation_accepted=False)
+
+    @property
     def member_count(self):
         return self.teammember_set.filter(invitation_accepted=True).count()
 
@@ -47,6 +51,10 @@ class TeamMember(models.Model):
                                               )
 
     joined_on = models.DateTimeField(auto_now=True)
+
+    @property
+    def get_user_username(self):
+        return self.profile.user.username
 
 
 class SoloEventRegistration(models.Model):
@@ -100,7 +108,7 @@ class TeamEventRegistration(models.Model):
 
     event = models.ForeignKey(to=TeamEvent, on_delete=models.PROTECT)
 
-    team = models.ForeignKey(to=Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(to=Team, on_delete=models.CASCADE, related_name='events')
 
     is_complete = models.BooleanField(default=False,
                                       help_text="Tells whether the team has completed all formalities like payments etc."
@@ -113,6 +121,10 @@ class TeamEventRegistration(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     updated_on = models.DateTimeField(auto_now=True)
+
+    @property
+    def get_event_public_id(self):
+        return self.event.public_id
 
     def clean(self):
         if self.is_complete is False and self.is_confirmed is True:
