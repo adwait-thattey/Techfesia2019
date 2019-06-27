@@ -1,4 +1,4 @@
-# Techfesia2019 [![Build Status](https://travis-ci.org/adwait-thattey/Techfesia2019.svg?branch=master)](https://travis-ci.org/adwait-thattey/Techfesia2019)   [![Coverage Status](https://coveralls.io/repos/github/adwait-thattey/Techfesia2019/badge.svg?branch=master)](https://coveralls.io/github/adwait-thattey/Techfesia2019?branch=master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a452db7571844503bc3d501ca7578621)](https://www.codacy.com/app/coder-dude/Techfesia2019?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adwait-thattey/Techfesia2019&amp;utm_campaign=Badge_Grade)
+# Techfesia2019 [![Build Status](https://travis-ci.org/masterashu/Techfesia2019.svg?branch=backend-event-registrations)](https://travis-ci.org/masterashu/Techfesia2019)  [![Coverage Status](https://coveralls.io/repos/github/masterashu/Techfesia2019/badge.svg?branch=backend-event-registrations)](https://coveralls.io/github/masterashu/Techfesia2019?branch=backend-event-registrations) 
 
 
 Repository for the 2019 Techfest website 
