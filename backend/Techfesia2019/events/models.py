@@ -58,7 +58,7 @@ class Event(models.Model):
 
     tags = models.ManyToManyField(Tags, related_name='events')
 
-    participants_waiting_list = models.ManyToManyField(Team, related_name='waiting_list_events')
+    participants_waiting_list = models.ManyToManyField('event_registrations.Team', related_name='waiting_list_events')
 
     max_participants = models.IntegerField(default=20)
 
