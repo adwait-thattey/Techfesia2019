@@ -38,7 +38,7 @@ class Team(models.Model):
 
 
 class TeamMember(models.Model):
-    team = models.ForeignKey(to=Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(to=Team, on_delete=models.CASCADE, related_name='teammember_set')
 
     profile = models.ForeignKey(to=Profile, on_delete=models.PROTECT)
 
