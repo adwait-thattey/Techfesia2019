@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import TeamDetailDeleteView, TeamListCreateView
+from .views import TeamDetailEditDeleteView, TeamListCreateView
 
 urlpatterns = [
-    path('<slug:public_id>/', TeamDetailDeleteView.as_view(), name='team_details'),
+    path('<slug:public_id>/', TeamDetailEditDeleteView.as_view(), name='team_details'),
     path('', TeamListCreateView.as_view(), name='teams_list'),
 ]
