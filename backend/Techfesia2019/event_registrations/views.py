@@ -67,3 +67,18 @@ class TeamListCreateView(APIView):
         team.save()
         data = TeamSerializer(team).data
         return Response(data, status=status.HTTP_201_CREATED)
+
+
+class TeamInvitationDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, username, format=None):
+        if not request.user.username == username:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_400_BAD_REQUEST)
+        invitations = TeamMember.objects.filter(profile=profile)
+        serializer = TeamMemberSerializer(invitations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
