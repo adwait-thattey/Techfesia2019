@@ -12,6 +12,10 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=13, validators=[MinLengthValidator(13)])
     college_name = models.CharField(max_length=150)
 
+    @property
+    def get_user_username(self):
+        return self.user.username
+
 
 class ProfileParticipant(models.Model):
     profile = models.OneToOneField(to=Profile, on_delete=models.CASCADE)
