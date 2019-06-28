@@ -17,9 +17,9 @@ class TeamSerializer(serializers.ModelSerializer):
 
 
 class TeamMemberSerializer(serializers.ModelSerializer):
-    profile = serializers.SlugRelatedField(read_only=True, slug_field='get_user_username')
+    leader = serializers.SlugRelatedField(read_only=True, slug_field='get_user_username')
     team = serializers.SlugRelatedField(read_only=True, slug_field='public_id')
 
     class Meta:
         model = TeamMember
-        fields = ['team', 'profile', 'invitation_accepted']
+        fields = ['team', 'team_name', 'leader', 'status']
