@@ -1,11 +1,12 @@
 from django.db import models
 from base.utils import generate_random_string, generate_public_id
 
-
 # Create your models here.
 
 
 class Ticket(models.Model):
+
+    # Fields Regarding User/ Query
     public_id = models.CharField(max_length=100,
                                  unique=True,
                                  blank=True,
@@ -26,6 +27,25 @@ class Ticket(models.Model):
                               on_delete=models.CASCADE
                               )
 
+    subscribers = models.ManyToManyField(to='accounts.Profile', related_name='subscribed_tickets')
+
+    # Fields regarding Solution
+    status = models.CharField(max_length=1,
+                              choices=(('O', 'Opened'), ('P', 'In Progress'), ('S', 'Solved')),
+                              default='O'
+                              )
+
+    solved_by = models.ForeignKey(to='accounts.Profile',
+                                  on_delete=models.CASCADE,
+                                  null=True,
+                                  blank=True,
+                                  related_name='solved_tickets'
+                                  )
+
+    solved_on = models.DateTimeField()
+
+    comment = models.CharField(max_length=2000)
+
     def save(self, *args, **kwargs):
         if not self.public_id:
             self.public_id = generate_public_id(self)
@@ -34,6 +54,7 @@ class Ticket(models.Model):
 
 
 class TicketComment(models.Model):
+
     public_id = models.CharField(max_length=100,
                                  unique=True,
                                  blank=True,
@@ -51,28 +72,10 @@ class TicketComment(models.Model):
 
     text = models.CharField(max_length=1000)
 
-    subscribers = models.ManyToManyField(to='accounts.Profile')
-
     posting_date = models.DateTimeField()
 
-    status = models.CharField(max_length=1,
-                              choices=(('O', 'Opened'), ('P', 'In Progress'), ('S', 'Solved')),
-                              default='O'
-                              )
-
-    solved_by = models.ForeignKey(to='accounts.Profile',
-                                  on_delete=models.CASCADE,
-                                  null=True,
-                                  blank=True,
-                                  related_name='solved_tickets'
-                                  )
-
-    solved_on = models.DateTimeField()
-
-    solution_comment = models.CharField(max_length=2000)
-
     def save(self, *args, **kwargs):
-        if not self.ticket.opened_by in self.subscribers.all():
+        if self.ticket.opened_by not in self.subscribers.all():
             self.subscribers.add(self.ticket.opened_by)
 
         if not self.public_id:
