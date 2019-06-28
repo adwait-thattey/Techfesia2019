@@ -21,18 +21,20 @@ class Ticket(models.Model):
                                   on_delete=models.CASCADE
                                   )
 
-    opening_date = models.DateTimeField()
+    opening_date = models.DateField(auto_now=True)
 
     event = models.ForeignKey(to='events.Event',
-                              on_delete=models.CASCADE
+                              on_delete=models.CASCADE,
+                              null=True,
+                              blank=True
                               )
 
     subscribers = models.ManyToManyField(to='accounts.Profile', related_name='subscribed_tickets')
 
     # Fields regarding Solution
-    status = models.CharField(max_length=1,
-                              choices=(('O', 'Opened'), ('P', 'In Progress'), ('S', 'Solved')),
-                              default='O'
+    status = models.CharField(max_length=20,
+                              choices=(('Opened', 'Opened'), ('In Progress', 'In Progress'), ('Solved', 'Solved')),
+                              default='Opened'
                               )
 
     solved_by = models.ForeignKey(to='accounts.Profile',
@@ -42,11 +44,15 @@ class Ticket(models.Model):
                                   related_name='solved_tickets'
                                   )
 
-    solved_on = models.DateTimeField()
+    solving_date = models.DateField(null=True, blank=True)
 
-    comment = models.CharField(max_length=2000)
+    content = models.CharField(max_length=2000)
 
     def save(self, *args, **kwargs):
+        if self.id:
+            if self.opened_by not in self.subscribers.all():
+                self.subscribers.add(self.opened_by)
+
         if not self.public_id:
             self.public_id = generate_public_id(self)
 
@@ -75,9 +81,6 @@ class TicketComment(models.Model):
     posting_date = models.DateTimeField()
 
     def save(self, *args, **kwargs):
-        if self.ticket.opened_by not in self.subscribers.all():
-            self.subscribers.add(self.ticket.opened_by)
-
         if not self.public_id:
             self.public_id = generate_public_id(self)
 
