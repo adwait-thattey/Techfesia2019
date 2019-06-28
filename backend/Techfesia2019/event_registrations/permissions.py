@@ -27,3 +27,8 @@ class IsStaffUserOrPost(permissions.BasePermission):
             return True
         else:
             return False
+
+
+class IsAuthenticatedOrPost(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) or request.method == 'POST'
