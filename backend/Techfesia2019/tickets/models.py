@@ -29,6 +29,8 @@ class Ticket(models.Model):
                               blank=True
                               )
 
+    is_public = models.BooleanField(default=True)
+
     subscribers = models.ManyToManyField(to='accounts.Profile', related_name='subscribed_tickets')
 
     # Fields regarding Solution
