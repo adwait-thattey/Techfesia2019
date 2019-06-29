@@ -69,7 +69,7 @@ class TeamListCreateView(APIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-class TeamInvitationDetailView(APIView):
+class TeamInvitationListView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, username, format=None):

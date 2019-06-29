@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import TeamInvitationDetailView
+from .views import TeamInvitationListView
 
 
 urlpatterns = [
-    path('', TeamInvitationDetailView.as_view()),
+    path('', TeamInvitationListView.as_view()),
 ]
