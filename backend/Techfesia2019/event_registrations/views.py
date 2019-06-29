@@ -138,3 +138,30 @@ class TeamInvitationRejectView(APIView):
             invitation.save()
         serializer = TeamMemberSerializer(invitation)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TeamInvitationCreateView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, public_id, format=None):
+        try:
+            username = dict(request.data)['username']
+        except KeyError:
+            return Response({'error': 'User/Profile does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        print(username)
+        profile = Profile.objects.get(user__username=username)
+        team = Team.objects.get(public_id=public_id)
+        if TeamMember.objects.filter(team=team, profile=profile) is not None:
+            return Response({'error': 'User Already Invited '}, status=status.HTTP_400_BAD_REQUEST)
+        if team.leader == request.user and profile:
+            team_member = TeamMember()
+            team_member.team = team
+            team_member.profile = profile
+            team_member.save()
+            serializer = TeamSerializer(team)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': 'You do not have access to do this'},
+                            status=status.HTTP_403_FORBIDDEN
+                            )
+        return Response(status=status.HTTP_200_OK)
