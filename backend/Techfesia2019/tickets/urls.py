@@ -1,7 +1,9 @@
 from django.urls import path
-from .views import TicketCreateListView
+from .views import TicketCreateListView, TicketCloseView, PublicTicketListView
 
 urlpatterns = [
-    path('ticket', TicketCreateListView.as_view()),
-    # path('ticket/<str:public_id>/',)
+    path('', TicketCreateListView.as_view()),
+    path('public', PublicTicketListView.as_view()),
+    path('<str:username>', TicketCreateListView.as_view()),
+    path('<str:public_id>/close', TicketCloseView.as_view()),
 ]
