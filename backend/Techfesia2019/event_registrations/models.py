@@ -52,7 +52,7 @@ class Team(models.Model):
 class TeamMember(models.Model):
     team = models.ForeignKey(to=Team, on_delete=models.CASCADE, related_name='teammember_set')
 
-    profile = models.ForeignKey(to=Profile, on_delete=models.PROTECT)
+    profile = models.ForeignKey(to=Profile, on_delete=models.PROTECT, related_name='member_teams')
 
     invitation_accepted = models.BooleanField(default=False,
                                               help_text="If true person has accepted invitation and is part of the team"
