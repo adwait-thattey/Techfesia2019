@@ -89,7 +89,7 @@ class TeamMember(models.Model):
         if self.invitation_accepted:
             self.invitation_rejected = False
         if self.invitation_rejected:
-            self.invitation_accepted = True
+            self.invitation_accepted = False
         super().save(*args, **kwargs)
 
 
