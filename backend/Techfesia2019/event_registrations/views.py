@@ -148,10 +148,10 @@ class TeamInvitationCreateView(APIView):
             username = dict(request.data)['username']
         except KeyError:
             return Response({'error': 'User/Profile does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        print(username)
         profile = Profile.objects.get(user__username=username)
         team = Team.objects.get(public_id=public_id)
-        if TeamMember.objects.filter(team=team, profile=profile) is not None:
+        if TeamMember.objects.filter(team=team, profile=profile).count() is not 0:
+            print(TeamMember)
             return Response({'error': 'User Already Invited '}, status=status.HTTP_400_BAD_REQUEST)
         if team.leader == request.user and profile:
             team_member = TeamMember()
@@ -164,4 +164,19 @@ class TeamInvitationCreateView(APIView):
             return Response({'error': 'You do not have access to do this'},
                             status=status.HTTP_403_FORBIDDEN
                             )
-        return Response(status=status.HTTP_200_OK)
+
+
+class TeamInvitationDeleteView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request, public_id, username, format=None):
+        profile = Profile.objects.get(user__username=username)
+        team = Team.objects.get(public_id=public_id)
+        try:
+            team_member = TeamMember.objects.get(team=team, profile=profile)
+        except TeamMember.DoesNotExist:
+            return Response({'error': 'Doesn\'t Exist'}, status=status.HTTP_204_NO_CONTENT)
+        if not team_member.invitation_accepted and team.leader == request.user:
+            team_member.delete()
+            return Response({'message': 'Invitation Deleted'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': 'Already Accepted, Try Deleting Member'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
