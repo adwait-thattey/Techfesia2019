@@ -48,6 +48,10 @@ class Ticket(models.Model):
 
     content = models.CharField(max_length=2000)
 
+    @property
+    def owner(self):
+        return self.opened_by.user
+
     def save(self, *args, **kwargs):
         if self.id:
             if self.opened_by not in self.subscribers.all():
