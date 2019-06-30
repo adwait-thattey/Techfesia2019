@@ -84,7 +84,7 @@ class TicketComment(models.Model):
 
     text = models.CharField(max_length=1000)
 
-    posting_date = models.DateTimeField()
+    posting_date = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.public_id:
