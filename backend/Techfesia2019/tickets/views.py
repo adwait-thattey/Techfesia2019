@@ -1,7 +1,8 @@
 import datetime as dt
 from .models import Ticket, TicketComment
-from .permissions import IsStaffUserOrOwnerOrPost, IsStaffUser
-from .serializers import TicketSerializer#, TicketCommentSerializer
+from .permissions import IsStaffUserOrOwnerOrPost, IsStaffUser, IsAuthenticatedOrPost
+from rest_framework.permissions import IsAuthenticated
+from .serializers import TicketSerializer, TicketCommentSerializer
 from accounts.models import Profile
 from registration.models import User
 from rest_framework.response import Response
@@ -66,3 +67,60 @@ class PublicTicketListView(APIView):
         tickets = Ticket.objects.filter(is_public=True)
         serializer = TicketSerializer(tickets, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TicketCommentListCreateView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, public_id, format=None):
+        comments = TicketComment.objects.filter(ticket__public_id=public_id)
+        serializer = TicketCommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, public_id, format=None):
+        data = JSONParser().parse(request)
+        comment = TicketComment()
+        try:
+            comment.text = data['text']
+            comment.ticket = Ticket.objects.get(public_id=data['ticket'])
+            comment.commenter = request.user.profile
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Doesn\'t Exist'},status=status.HTTP_204_NO_CONTENT)
+        except KeyError:
+            return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
+        comment.save()
+        serializer = TicketCommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TicketCommentDetailUpdateDeleteView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, public_id, comment_id, format=None):
+        try:
+            comment = TicketComment.objects.get(public_id=comment_id, ticket__public_id=public_id)
+        except TicketComment.DoesNotExist:
+            return Response({'error': 'Comment Not Found'}, status=status.HTTP_204_NO_CONTENT)
+        serializer = TicketCommentSerializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, public_id, comment_id, format=None):
+        data = JSONParser().parse(request)
+        try:
+            comment = TicketComment.objects.get(public_id=comment_id, ticket__public_id=public_id)
+        except TicketComment.DoesNotExist:
+            return Response({'error': 'Comment Not Found'}, status=status.HTTP_204_NO_CONTENT)
+        serializer = TicketCommentSerializer(comment, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, public_id, comment_id, format=None):
+        try:
+            comment = TicketComment.objects.get(public_id=comment_id, ticket__public_id=public_id)
+        except TicketComment.DoesNotExist:
+            return Response({'error': 'Comment Not Found'}, status=status.HTTP_204_NO_CONTENT)
+        comment.delete()
+        return Response({'message': 'Comment Deleted'}, status=status.HTTP_200_OK)

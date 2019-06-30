@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import TicketComment, Ticket
+from accounts.models import Profile
 
 
 class TicketSerializer(serializers.ModelSerializer):
