@@ -1,8 +1,9 @@
 import datetime as dt
 from .models import Ticket, TicketComment
-from .permissions import IsStaffUserOrOwnerOrPost, IsStaffUser, IsAuthenticatedOrPost
+from .permissions import IsStaffUser
 from rest_framework.permissions import IsAuthenticated
 from .serializers import TicketSerializer, TicketCommentSerializer
+from events.models import Event
 from accounts.models import Profile
 from registration.models import User
 from rest_framework.response import Response
@@ -14,11 +15,12 @@ from rest_framework import status
 
 
 class TicketCreateListView(APIView):
-    permission_classes = (IsStaffUserOrOwnerOrPost,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, username=None, format=None):
         tickets = Ticket.objects.all()
-        if username and request.user.username == username or request.user.is_staff:
+        print(tickets)
+        if username and (request.user.username == username or request.user.is_staff):
             tickets = tickets.filter(opened_by__user__username=username)
         if not request.user.is_staff:
             profile = Profile.objects.get(user=request.user)
@@ -31,15 +33,25 @@ class TicketCreateListView(APIView):
         if q_event:
             tickets = tickets.filter(event__public_id=q_event)
         serializer = TicketSerializer(tickets, many=True)
+        print(tickets)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
-        data = JSONParser().parse(request)
-        serializer = TicketSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            return Response({'message': 'Wrong data'}, status=status.HTTP_400_BAD_REQUEST)
+        data = dict(JSONParser().parse(request))
+        ticket = Ticket()
+        ticket.opened_by = request.user.profile
+        try:
+            ticket.title = data['title']
+            ticket.description = data['description']
+        except KeyError:
+            return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
+        print(data.get('view'), data.get('view') == 'private')
+        if data.get('view') == 'private':
+            ticket.is_public = False
+        if data.get('event'):
+            ticket.event = Event.objects.get(public_id=data.get('event'))
+        ticket.save()
+        serializer = TicketSerializer(ticket)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
