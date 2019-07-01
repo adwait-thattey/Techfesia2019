@@ -6,11 +6,15 @@ from events.models import Event, SoloEvent
 from registration.models import User
 
 
+class Institute(models.Model):
+    name = models.CharField(max_length=200, default='Indian Institute of Information Technology, Sri City')
+
+
 class Profile(models.Model):
     user = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name='profile')
     profile_pic = models.URLField()
     phone_number = models.CharField(max_length=13, validators=[MinLengthValidator(13)])
-    college_name = models.CharField(max_length=150)
+    college = models.ForeignKey(to=Institute, on_delete=models.CASCADE, blank=True, null=True)
 
     @property
     def get_user_username(self):
