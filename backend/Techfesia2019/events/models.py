@@ -58,8 +58,6 @@ class Event(models.Model):
 
     tags = models.ManyToManyField(Tags, related_name='events')
 
-    participants_waiting_list = models.ManyToManyField('event_registrations.Team', related_name='waiting_list_events')
-
     max_participants = models.IntegerField(default=20)
 
     reserved_slots = models.IntegerField(default=0, help_text="No of participant slots reserved for external players")

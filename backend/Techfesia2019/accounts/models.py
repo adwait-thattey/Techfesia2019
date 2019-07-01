@@ -7,7 +7,7 @@ from registration.models import User
 
 
 class Institute(models.Model):
-    name = models.CharField(max_length=200, default='Indian Institute of Information Technology, Sri City')
+    name = models.CharField(max_length=200, default='Indian Institute of Information Technology, Sri City', unique=True)
 
 
 class Profile(models.Model):

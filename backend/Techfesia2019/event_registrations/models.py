@@ -42,6 +42,21 @@ class Team(models.Model):
     def member_count(self):
         return self.teammember_set.filter(invitation_accepted=True).count()
 
+    @property
+    def is_reserved(self):
+        try:
+            if self.team_leader.college.name == 'Indian Institute of Information Technology, Sri City':
+                for i in self.teammember_set.all():
+                    try:
+                        if i.profile.college.name != 'Indian Institute of Information Technology, Sri City':
+                            return False
+                    except:
+                        return False
+                return True
+        except:
+            return False
+        return False
+
     def save(self, *args, **kwargs):
         if not self.public_id:
             self.public_id = generate_public_id(self)
