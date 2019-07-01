@@ -78,3 +78,7 @@ class SoloEvent(Event):
 class TeamEvent(Event):
     min_team_size = models.IntegerField(default=1)
     max_team_size = models.IntegerField(default=1)
+
+    @property
+    def event_type(self):
+        return 'team'

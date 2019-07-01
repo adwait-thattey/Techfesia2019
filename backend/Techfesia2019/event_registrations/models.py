@@ -159,8 +159,22 @@ class TeamEventRegistration(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
 
     @property
+    def event_type(self):
+        return 'team'
+
+    @property
     def get_event_public_id(self):
         return self.event.public_id
+
+    @property
+    def status(self):
+        if self.is_complete:
+            if self.is_confirmed:
+                return 'confirmed'
+            else:
+                return 'waiting'
+        else:
+            return 'payment pending'
 
     def clean(self):
         if self.is_complete is False and self.is_confirmed is True:

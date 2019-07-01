@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from events.models import TeamEvent
 from .models import Team, SoloEventRegistration, TeamEventRegistration, TeamMember
 
 
@@ -23,3 +24,21 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamMember
         fields = ['team', 'team_name', 'leader', 'status']
+
+
+class TeamEventRegistrationSerializer(serializers.ModelSerializer):
+    registration_id = serializers.CharField(source='public_id', read_only=True)
+    team_id = serializers.SlugRelatedField(source='team', read_only=True, slug_field='public_id')
+    
+    class Meta:
+        model = TeamEventRegistration
+        fields = ['registration_id', 'team_id', 'status']
+
+
+# This Serializer is To List all Registrations for a Team Event
+class TeamEventRegistrationsSerializer(serializers.ModelSerializer):
+    registrations = TeamEventRegistrationSerializer(source='teameventregistration_set', many=True)
+
+    class Meta:
+        model = TeamEvent
+        fields = ['public_id', 'event_type', 'registrations']
