@@ -218,29 +218,59 @@ class TeamEventRegistrationView(APIView):
         if base_event.team_event:  # Team Event Registration
             try:
                 event = base_event.teamevent
+
             except TeamEvent.DoesNotExist:
                 return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
             registration = TeamEventRegistration()
             registration.event = event
+
             try:
-                registration.team = Team.objects.get(pubic_id=data['team'])
+                team = Team.objects.get(public_id=data['team'])
+                print(team.leader, request.user)
+                if team.leader != request.user:
+                    return Response({'error': 'Only Team Leader can register a Team for an event'},
+                                    status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                                    )
+                registration.team = team
+
             except KeyError as key:
                 return Response({'error': '{0} is a required field.'.format(key)}, status=status.HTTP_400_BAD_REQUEST)
+
             except Team.DoesNotExist:
                 return Response({'error': 'Team does not exit'}, status=status.HTTP_400_BAD_REQUEST)
-            if TeamEventRegistration.objects.filter(team__team_leader__user=request.user, event=event).count is not 0:
+
+            if TeamEventRegistration.objects.filter(team__team_leader__user=request.user, event=event).count() is not 0:
                 registration = TeamEventRegistration.objects.filter(team__team_leader__user=request.user, event=event)
-                serializer = TeamEventRegistrationSerializer(registration)
-                return Response({'error': 'Already registered for event', 'details': serializer.data},
+                serializer = TeamEventRegistrationSerializer(registration[0])
+                return Response({'error': 'Already registered for event', 'registration_details': serializer.data},
                                 status=status.HTTP_422_UNPROCESSABLE_ENTITY
                                 )
+
             registration.save()
+            serializer = TeamEventRegistrationSerializer(registration)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:  # Solo Event Registration TODO: SAYAM
             pass
 
         # serializer = TeamEventRegistrationSerializer(registration)
         # return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_200_OK)
+
+    def delete(self, request, public_id, format=None):
+        try:
+            base_event = Event.objects.get(public_id=public_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            event = base_event.teamevent
+        except TeamEvent.DoesNotExist:
+            return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            registration = TeamEventRegistration.objects.get(event=event, team__team_leader__user=request.user)
+        except TeamEventRegistration.DoesNotExist:
+            return Response({'error': 'Not Registered for Event'}, status=status.HTTP_204_NO_CONTENT)
+        registration.delete()
+        return Response({'message': 'unregistered from event'}, status=status.HTTP_200_OK)
 
 
 class TeamEventRegistrationListView(APIView):
