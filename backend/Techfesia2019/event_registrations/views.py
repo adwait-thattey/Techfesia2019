@@ -1,7 +1,9 @@
 from accounts.models import Profile
-from .models import Team, TeamMember
+from events.models import Event, TeamEvent
+from .models import Team, TeamMember, TeamEventRegistration
 from .permissions import IsStaffUser, IsStaffUserOrPost, IsAuthenticatedOrPost
-from .serializers import TeamSerializer, TeamMemberSerializer
+from .serializers import TeamSerializer, TeamMemberSerializer, TeamEventRegistrationSerializer
+from .serializers import TeamEventRegistrationsSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -203,3 +205,75 @@ class TeamMemberDeleteView(APIView):
             return Response({'message': 'Member Deleted'}, status=status.HTTP_204_NO_CONTENT)
         return Response({'error': 'You do not have the permission to do this'}, status=status.HTTP_403_FORBIDDEN)
 
+
+class TeamEventRegistrationView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, public_id, format=None):
+        try:
+            base_event = Event.objects.get(public_id=public_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+        data = JSONParser().parse(request)
+        if base_event.team_event:  # Team Event Registration
+            try:
+                event = base_event.teamevent
+            except TeamEvent.DoesNotExist:
+                return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            registration = TeamEventRegistration()
+            registration.event = event
+            try:
+                registration.team = Team.objects.get(pubic_id=data['team'])
+            except KeyError as key:
+                return Response({'error': '{0} is a required field.'.format(key)}, status=status.HTTP_400_BAD_REQUEST)
+            except Team.DoesNotExist:
+                return Response({'error': 'Team does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+            if TeamEventRegistration.objects.filter(team__team_leader__user=request.user, event=event).count is not 0:
+                registration = TeamEventRegistration.objects.filter(team__team_leader__user=request.user, event=event)
+                serializer = TeamEventRegistrationSerializer(registration)
+                return Response({'error': 'Already registered for event', 'details': serializer.data},
+                                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                                )
+            registration.save()
+        else:  # Solo Event Registration TODO: SAYAM
+            pass
+
+        # serializer = TeamEventRegistrationSerializer(registration)
+        # return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_200_OK)
+
+
+class TeamEventRegistrationListView(APIView):
+    permission_classes = (IsStaffUser,)
+
+    def get(self, request, public_id, format=None):
+        try:
+            base_event = Event.objects.get(public_id=public_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            event = base_event.teamevent
+        except TeamEvent.DoesNotExist:
+            return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        serializer = TeamEventRegistrationsSerializer(event)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TeamEventRegistrationDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, public_id, format=None):
+        try:
+            base_event = Event.objects.get(public_id=public_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            event = base_event.teamevent
+        except TeamEvent.DoesNotExist:
+            return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            registration = TeamEventRegistration.objects.get(event=event, team__team_leader__user=request.user)
+        except TeamEventRegistration.DoesNotExist:
+            return Response({'error': 'User is Not Registered'}, status=status.HTTP_204_NO_CONTENT)
+        serializer = TeamEventRegistrationSerializer(registration)
+        return Response(serializer.data, status=status.HTTP_200_OK)
