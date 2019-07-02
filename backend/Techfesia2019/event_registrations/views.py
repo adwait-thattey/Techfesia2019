@@ -35,6 +35,8 @@ class TeamDetailEditDeleteView(APIView):
             team = Team.objects.get(public_id=public_id)
             if team.leader is not request.user and not request.user.is_staff:
                 return Response({'error': 'This Team is not yours to delete'}, status=status.HTTP_403_FORBIDDEN)
+            if team.events.count() == 0:
+                return Response({'error': 'Can\'t delete a registered team.'}, status=status.HTTP_403_FORBIDDEN)
             team.delete()
         except Team.DoesNotExist:
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -158,8 +160,9 @@ class TeamInvitationCreateView(APIView):
             return Response({'error': 'User/Profile does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user__username=username)
         team = Team.objects.get(public_id=public_id)
+        if team.events.count() is not 0:
+            return Response({'error': 'Can\'t add member to a registered team'})
         if TeamMember.objects.filter(team=team, profile=profile).count() is not 0:
-            print(TeamMember)
             return Response({'error': 'User Already Invited '}, status=status.HTTP_400_BAD_REQUEST)
         if team.leader == request.user and profile:
             team_member = TeamMember()
@@ -196,6 +199,8 @@ class TeamMemberDeleteView(APIView):
     def delete(self, request, public_id, username, format=None):
         profile = Profile.objects.get(user__username=username)
         team = Team.objects.get(public_id=public_id)
+        if team.events.count() is not 0:
+            return Response({'error': 'Can\'t remove member from a registered team'})
         try:
             team_member = TeamMember.objects.get(team=team, profile=profile, invitation_accepted=True)
         except TeamMember.DoesNotExist:
