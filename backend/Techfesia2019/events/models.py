@@ -80,3 +80,16 @@ class TeamEvent(Event):
     @property
     def event_type(self):
         return 'team'
+
+    def find_registration(self, user):
+        if self.teameventregistration_set.filter(team__team_leader=user.profile).count() is 0:
+            if self.teameventregistration_set.filter(team__teammember_set__profile=user.profile).count() is not 0:
+                return self.teameventregistration_set.filter(team__teammember_set__profile=user.profile)[0]
+            else:
+                return None
+        else:
+            return self.teameventregistration_set.filter(team__team_leader__user=user)[0]
+
+    def refresh_participants(self):
+        current_participants = self.teameventregistration_set.filter(is_complete=True).count()
+        current_reserved_participants = self.teameventregistration_set.filter(is_complete=True)

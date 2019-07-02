@@ -57,6 +57,9 @@ class Team(models.Model):
             return False
         return False
 
+    def ready(self):
+        return self.invitees.count() == 0
+
     def save(self, *args, **kwargs):
         if not self.public_id:
             self.public_id = generate_public_id(self)
@@ -172,6 +175,8 @@ class TeamEventRegistration(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     updated_on = models.DateTimeField(auto_now=True)
+
+    is_reserved = models.BooleanField(default=False)
 
     @property
     def event_type(self):
