@@ -1,8 +1,8 @@
 from accounts.models import Profile
-from events.models import Event, TeamEvent
-from .models import Team, TeamMember, TeamEventRegistration
+from events.models import Event, TeamEvent, SoloEvent
+from .models import Team, TeamMember, TeamEventRegistration, SoloEventRegistration
 from .permissions import IsStaffUser, IsStaffUserOrPost, IsAuthenticatedOrPost
-from .serializers import TeamSerializer, TeamMemberSerializer, TeamEventRegistrationSerializer
+from .serializers import TeamSerializer, TeamMemberSerializer, TeamEventRegistrationSerializer, SoloEventRegistrationSerializer
 from .serializers import TeamEventRegistrationsSerializer
 from rest_framework import status
 from rest_framework.views import APIView
@@ -215,21 +215,22 @@ class TeamEventRegistrationView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, public_id, format=None):
+        # 1. Get Event (check if wrong event type)
         try:
             base_event = Event.objects.get(public_id=public_id)
         except Event.DoesNotExist:
             return Response({'error': 'Event does not exit'}, status=status.HTTP_400_BAD_REQUEST)
         data = JSONParser().parse(request)
-        if base_event.team_event:  # Team Event Registration
+
+        # For Team Events
+        if base_event.team_event:
+        # 1. Get Team Event Model
             try:
                 event = base_event.teamevent
-
             except TeamEvent.DoesNotExist:
                 return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-            registration = TeamEventRegistration()
-            registration.event = event
-
+        # 2. Get Team Details (verify team size, leader)
             try:
                 team = Team.objects.get(public_id=data['team'])
                 print(team.leader, request.user)
@@ -237,29 +238,54 @@ class TeamEventRegistrationView(APIView):
                     return Response({'error': 'Only Team Leader can register a Team for an event'},
                                     status=status.HTTP_422_UNPROCESSABLE_ENTITY
                                     )
-                registration.team = team
-
             except KeyError as key:
                 return Response({'error': '{0} is a required field.'.format(key)}, status=status.HTTP_400_BAD_REQUEST)
 
             except Team.DoesNotExist:
                 return Response({'error': 'Team does not exit'}, status=status.HTTP_400_BAD_REQUEST)
 
-            if TeamEventRegistration.objects.filter(team__team_leader__user=request.user, event=event).count() is not 0:
-                registration = TeamEventRegistration.objects.filter(team__team_leader__user=request.user, event=event)
-                serializer = TeamEventRegistrationSerializer(registration[0])
+        # 3. Check for existing registration
+            team_members = [team.team_leader.user, ] + [i.profile.user for i in team.teammember_set.all()]
+            for i in team_members:
+                if event.find_registration(user=i).count() is not 0:
+                    serializer = TeamEventRegistrationSerializer(event.find_registration(user=i), many=True)
+                    return Response({'error': 'Already registered for event', 'registration_details': serializer.data},
+                                    status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                                    )
+        # 4. Register Team
+            registration = TeamEventRegistration()
+            registration.team = team
+            registration.event = event
+            registration.is_reserved = team.is_reserved
+            registration.save()
+
+        # For Solo Events:
+        else:
+            # 1. Get Solo Event Model
+            try:
+                event = base_event.soloevent
+            except SoloEvent.DoesNotExist:
+                return Response({'error': 'The event is not a Solo Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+            # 2. Get User Profile Details
+            try:
+                profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                return Response({'error': 'User Profile do not exist or incomplete'}, status=status.HTTP_404_NOT_FOUND)
+
+            # 3. Check for existing registration
+            if SoloEventRegistration.objects.filter(profile=profile, event=event).count() is not 0:
+                registration = SoloEventRegistration.objects.filter(profile=profile, event=event)[0]
+                serializer = SoloEventRegistrationSerializer(registration)
                 return Response({'error': 'Already registered for event', 'registration_details': serializer.data},
                                 status=status.HTTP_422_UNPROCESSABLE_ENTITY
                                 )
-
+            # 4. Register Person
+            registration = SoloEventRegistration()
+            registration.profile = profile
+            registration.event = event
+            registration.is_reserved = (profile.college.name == 'Indian Institute of Information Technology, Sri City')
             registration.save()
-            serializer = TeamEventRegistrationSerializer(registration)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:  # Solo Event Registration TODO: SAYAM
-            pass
-
-        # serializer = TeamEventRegistrationSerializer(registration)
-        # return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, public_id, format=None):
         try:
