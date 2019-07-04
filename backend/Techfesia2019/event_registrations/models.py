@@ -27,6 +27,13 @@ class Team(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
 
     @property
+    def team_members(self):
+        name_list = []
+        for i in self.teammember_set.all():
+            name_list.append(i.profile.user.first_name + ' ' + i.profile.user.last_name)
+        return ','.join(name_list)
+
+    @property
     def leader(self):
         return self.team_leader.user
 
@@ -129,9 +136,21 @@ class SoloEventRegistration(models.Model):
                                        help_text="Tells whether registration is confirmed or is in waiting"
                                        )
 
+    is_reserved = models.BooleanField(default=False)
+
     created_on = models.DateTimeField(auto_now_add=True)
 
     updated_on = models.DateTimeField(auto_now=True)
+
+    @property
+    def status(self):
+        if self.is_complete:
+            if self.is_confirmed:
+                return 'confirmed'
+            else:
+                return 'waiting'
+        else:
+            return 'payment pending'
 
     def clean(self):
         if self.is_complete is False and self.is_confirmed is True:
