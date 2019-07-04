@@ -42,3 +42,12 @@ class TeamEventRegistrationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamEvent
         fields = ['public_id', 'event_type', 'registrations']
+
+
+class SoloEventRegistrationSerializer(serializers.ModelSerializer):
+    registration_id = serializers.CharField(source='public_id', read_only=True)
+    user_id = serializers.SlugRelatedField(source='profile', read_only=True, slug_field='get_user_username')
+
+    class Meta:
+        model = SoloEventRegistration
+        fields = ['registration_id', 'user_id', 'status']
