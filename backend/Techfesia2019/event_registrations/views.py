@@ -258,6 +258,8 @@ class TeamEventRegistrationView(APIView):
             registration.event = event
             registration.is_reserved = team.is_reserved
             registration.save()
+            serializer = TeamEventRegistrationSerializer(registration)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         # For Solo Events:
         else:
@@ -286,6 +288,9 @@ class TeamEventRegistrationView(APIView):
             registration.event = event
             registration.is_reserved = (profile.college.name == 'Indian Institute of Information Technology, Sri City')
             registration.save()
+            serializer = SoloEventRegistrationSerializer(registration)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # TODO: Refresh Waiting List for Events
 
     def delete(self, request, public_id, format=None):
         try:
