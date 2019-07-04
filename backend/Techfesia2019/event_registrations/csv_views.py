@@ -1,7 +1,10 @@
-from django.http import StreamingHttpResponse, HttpResponse
-from .models import SoloEventRegistration, TeamEventRegistration, Team, TeamMember
+from django.http import StreamingHttpResponse, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login as auth_login, authenticate
 from events.models import Event, TeamEvent
 from .permissions import IsStaffUser
+from .forms import StaffLoginForm
 import csv
 from itertools import chain
 from rest_framework.decorators import permission_classes
@@ -14,7 +17,8 @@ class Echo:
         return value
 
 
-# @permission_classes([IsStaffUser,])  todo: Add Permission to make sure a staff user is accessing the data
+@login_required(login_url='staff_login', redirect_field_name='next')
+@permission_classes([IsStaffUser, ])  # todo: Add Permission to make sure a staff user is accessing the data
 def get_event_registrations(request, public_id):
     base_event = Event.objects.get(public_id=public_id)
     # if Event is a Team Event
@@ -55,3 +59,35 @@ def get_event_registrations(request, public_id):
     return response
 
 
+def staff_login(request):
+    if request.method == 'POST':
+        print(request.POST)
+        try:
+            next_url = request.POST['next']
+        except KeyError:
+            next_url = None
+        print(next_url)
+        form = StaffLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
+                if next_url:
+                    print(next_url)
+                    return HttpResponseRedirect(next_url)
+                else:
+                    return HttpResponse('Login Successful')
+            else:
+                context = {'form': form, 'error': 'User does not exist'}
+                return render(request, 'event_registrations/staff_login.html', context=context)
+        else:
+            context = {'form': form, 'error': 'Unable to process, Please Try Again'}
+            return render(request, 'event_registrations/staff_login.html', context=context)
+    elif request.method == 'GET':
+        context = {'form': StaffLoginForm()}
+        if dict(request.GET).get('next'):
+            next_url = request.GET['next']
+            context['next'] = next_url
+        return render(request, 'event_registrations/staff_login.html', context=context)
