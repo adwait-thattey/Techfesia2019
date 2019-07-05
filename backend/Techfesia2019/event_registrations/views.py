@@ -25,7 +25,8 @@ class TeamDetailEditDeleteView(APIView):
 
     def get(self, request, public_id, format=None):
         team = self.get_object(public_id)
-        if team.leader is not request.user and not request.user.is_staff:
+        print(team.leader, request.user)
+        if team.leader != request.user and not request.user.is_staff:
             return Response({'error': 'This is not your Team'}, status=status.HTTP_403_FORBIDDEN)
         serializer = TeamSerializer(team)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -33,7 +34,7 @@ class TeamDetailEditDeleteView(APIView):
     def delete(self, request, public_id, format=None):
         try:
             team = Team.objects.get(public_id=public_id)
-            if team.leader is not request.user and not request.user.is_staff:
+            if team.leader != request.user and not request.user.is_staff:
                 return Response({'error': 'This Team is not yours to delete'}, status=status.HTTP_403_FORBIDDEN)
             if team.events.count() == 0:
                 return Response({'error': 'Can\'t delete a registered team.'}, status=status.HTTP_403_FORBIDDEN)
@@ -44,7 +45,7 @@ class TeamDetailEditDeleteView(APIView):
 
     def put(self, request, public_id, format=None):
         team = self.get_object(public_id=public_id)
-        if team.leader is not request.user and not request.user.is_staff:
+        if team.leader != request.user and not request.user.is_staff:
             return Response({'error': 'This is not your Team'}, status=status.HTTP_403_FORBIDDEN)
         try:
             team.name = JSONParser().parse(request)['name']
