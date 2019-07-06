@@ -1,29 +1,27 @@
+from django.db import IntegrityError
+from rest_framework import status
+from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from accounts.models import Profile
 from events.models import Event, TeamEvent, SoloEvent
 from .models import Team, TeamMember, TeamEventRegistration, SoloEventRegistration
-from .permissions import IsStaffUser, IsStaffUserOrPost, IsAuthenticatedOrPost
-from .serializers import TeamSerializer, TeamMemberSerializer, TeamEventRegistrationSerializer
+from .permissions import IsStaffUser, IsAuthenticatedOrPost
 from .serializers import SoloEventRegistrationSerializer, SoloEventRegistrationsSerializer
 from .serializers import TeamEventRegistrationsSerializer
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.parsers import JSONParser
-from rest_framework.permissions import IsAuthenticated
+from .serializers import TeamSerializer, TeamMemberSerializer, TeamEventRegistrationSerializer
 
 
 class TeamDetailEditDeleteView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get_object(self, public_id):
+    def get(self, request, public_id, format=None):
         try:
-            return Team.objects.get(public_id=public_id)
+            team = Team.objects.get(public_id=public_id)
         except Team.DoesNotExist:
             return Response({'message': 'Team Doesn\'t Exist.'}, status=status.HTTP_204_NO_CONTENT)
-
-    def get(self, request, public_id, format=None):
-        team = self.get_object(public_id)
-        print(team.leader, request.user)
         if team.leader != request.user and not request.user.is_staff:
             return Response({'error': 'This is not your Team'}, status=status.HTTP_403_FORBIDDEN)
         serializer = TeamSerializer(team)
@@ -42,7 +40,10 @@ class TeamDetailEditDeleteView(APIView):
         return Response({'message': 'Team Deleted'}, status=status.HTTP_200_OK)
 
     def put(self, request, public_id, format=None):
-        team = self.get_object(public_id=public_id)
+        try:
+            team = Team.objects.get(public_id=public_id)
+        except Team.DoesNotExist:
+            return Response({'message': 'Team Doesn\'t Exist.'}, status=status.HTTP_204_NO_CONTENT)
         if team.leader != request.user and not request.user.is_staff:
             return Response({'error': 'This is not your Team'}, status=status.HTTP_403_FORBIDDEN)
         try:
@@ -50,6 +51,8 @@ class TeamDetailEditDeleteView(APIView):
             team.save()
         except KeyError:
             return Response({'message': 'required field "name" not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response({'message': 'required field "name" already in use'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(TeamSerializer(team).data, status=status.HTTP_200_OK)
 
 
@@ -72,8 +75,14 @@ class TeamListCreateView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         data = JSONParser().parse(request)
-        team = Team(name=data['name'], team_leader=profile)
-        team.save()
+        try:
+            team = Team(name=data['name'], team_leader=profile)
+            team.save()
+        except KeyError:
+            return Response({'message': 'required field "name" not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError:
+            return Response({'message': 'required field "name" already in use'}, status=status.HTTP_400_BAD_REQUEST)
+
         data = TeamSerializer(team).data
         return Response(data, status=status.HTTP_201_CREATED)
 
@@ -223,13 +232,13 @@ class EventRegistrationView(APIView):
 
         # For Team Events
         if base_event.team_event:
-        # 1. Get Team Event Model
+            # 1. Get Team Event Model
             try:
                 event = base_event.teamevent
             except TeamEvent.DoesNotExist:
                 return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        # 2. Get Team Details (verify team size, leader)
+            # 2. Get Team Details (verify team size, leader)
             try:
                 team = Team.objects.get(public_id=data['team'])
                 print(team.leader, request.user)
@@ -243,7 +252,7 @@ class EventRegistrationView(APIView):
             except Team.DoesNotExist:
                 return Response({'error': 'Team does not exit'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 3. Check for existing registration
+            # 3. Check for existing registration
             team_members = [team.team_leader.user, ] + [i.profile.user for i in team.teammember_set.all()]
             for i in team_members:
                 if event.find_registration(user=i).count() is not 0:
@@ -251,7 +260,7 @@ class EventRegistrationView(APIView):
                     return Response({'error': 'Already registered for event', 'registration_details': serializer.data},
                                     status=status.HTTP_422_UNPROCESSABLE_ENTITY
                                     )
-        # 4. Register Team
+            # 4. Register Team
             registration = TeamEventRegistration()
             registration.team = team
             registration.event = event
