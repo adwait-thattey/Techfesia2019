@@ -257,6 +257,7 @@ class EventRegistrationView(APIView):
             registration.event = event
             registration.is_reserved = team.is_reserved
             registration.save()
+            event.refresh_participants()  # Refreshing registrations
             serializer = TeamEventRegistrationSerializer(registration)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -287,9 +288,9 @@ class EventRegistrationView(APIView):
             registration.event = event
             registration.is_reserved = (profile.college.name == 'Indian Institute of Information Technology, Sri City')
             registration.save()
+            event.refresh_participants()  # Refreshing registrations
             serializer = SoloEventRegistrationSerializer(registration)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # TODO: Refresh Waiting List for Events
 
     def delete(self, request, public_id, format=None):
         try:
@@ -306,6 +307,7 @@ class EventRegistrationView(APIView):
             except TeamEventRegistration.DoesNotExist:
                 return Response({'error': 'Not Registered for Event'}, status=status.HTTP_204_NO_CONTENT)
             registration.delete()
+            event.refresh_participants()  # Refreshing registrations
             return Response({'message': 'Successfully unregistered from event'}, status=status.HTTP_200_OK)
         else:
             try:
@@ -317,6 +319,7 @@ class EventRegistrationView(APIView):
             except SoloEvent.DoesNotExist:
                 return Response({'error': 'Not Registered for Event'}, status=status.HTTP_204_NO_CONTENT)
             registration.delete()
+            event.refresh_participants()  # Refreshing registrations
             return Response({'message': 'Successfully unregistered from event'}, status=status.HTTP_200_OK)
 
 
