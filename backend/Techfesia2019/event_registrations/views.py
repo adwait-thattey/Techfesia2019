@@ -112,7 +112,10 @@ class TeamInvitationDetailView(APIView):
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
             return Response({'message': 'User Profile is not complete'}, status=status.HTTP_400_BAD_REQUEST)
-        invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
+        try:
+            invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
+        except TeamMember.DoesNotExist:
+            return Response({'message': 'you have no invitations'}, status=status.HTTP_404_NOT_FOUND)
         serializer = TeamMemberSerializer(invitation)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -228,7 +231,6 @@ class EventRegistrationView(APIView):
             base_event = Event.objects.get(public_id=public_id)
         except Event.DoesNotExist:
             return Response({'error': 'Event does not exit'}, status=status.HTTP_400_BAD_REQUEST)
-        data = JSONParser().parse(request)
 
         # For Team Events
         if base_event.team_event:
@@ -239,6 +241,7 @@ class EventRegistrationView(APIView):
                 return Response({'error': 'The event is not a team Event'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
             # 2. Get Team Details (verify team size, leader)
+            data = JSONParser().parse(request)
             try:
                 team = Team.objects.get(public_id=data['team'])
                 print(team.leader, request.user)
@@ -255,7 +258,7 @@ class EventRegistrationView(APIView):
             # 3. Check for existing registration
             team_members = [team.team_leader.user, ] + [i.profile.user for i in team.teammember_set.all()]
             for i in team_members:
-                if event.find_registration(user=i).count() is not 0:
+                if event.find_registration(user=i) is not None:
                     serializer = TeamEventRegistrationSerializer(event.find_registration(user=i), many=True)
                     return Response({'error': 'Already registered for event', 'registration_details': serializer.data},
                                     status=status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -368,10 +371,10 @@ class EventRegistrationDetailView(APIView):
                 event = base_event.teamevent
             except TeamEvent.DoesNotExist:
                 return Response({'error': 'The event Doesn\'t exist'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            try:
-                registration = event.find_registration(user=request.user)[0]
-            except TeamEventRegistration.DoesNotExist:
+            if event.find_registration(user=request.user) is None:
                 return Response({'error': 'User is Not Registered'}, status=status.HTTP_204_NO_CONTENT)
+            else:
+                registration = event.find_registration(user=request.user)
             serializer = TeamEventRegistrationSerializer(registration)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

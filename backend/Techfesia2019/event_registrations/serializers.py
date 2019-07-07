@@ -4,6 +4,7 @@ from .models import Team, SoloEventRegistration, TeamEventRegistration, TeamMemb
 
 
 class TeamSerializer(serializers.ModelSerializer):
+    teamId = serializers.CharField(source='public_id', read_only=True)
     members = serializers.SlugRelatedField(many=True, read_only=True, slug_field='get_user_username')
     leader = serializers.SlugRelatedField(read_only=True, slug_field='username')
     invitees = serializers.SlugRelatedField(many=True, read_only=True, slug_field='get_user_username')
@@ -11,7 +12,7 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        fields = ['public_id', 'name', 'leader', 'members', 'invitees', 'events']
+        fields = ['teamId', 'name', 'leader', 'members', 'invitees', 'events']
 
     def is_valid(self, raise_exception=False):
         return super().is_valid()
@@ -19,44 +20,50 @@ class TeamSerializer(serializers.ModelSerializer):
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     leader = serializers.SlugRelatedField(read_only=True, slug_field='get_user_username')
-    team = serializers.SlugRelatedField(read_only=True, slug_field='public_id')
+    name = serializers.CharField(source='team_name', read_only=True)
+    teamId = serializers.SlugRelatedField(read_only=True, slug_field='public_id')
 
     class Meta:
         model = TeamMember
-        fields = ['team', 'team_name', 'leader', 'status']
+        fields = ['teamId', 'name', 'leader', 'status']
 
 
 class TeamEventRegistrationSerializer(serializers.ModelSerializer):
-    registration_id = serializers.CharField(source='public_id', read_only=True)
-    team_id = serializers.SlugRelatedField(source='team', read_only=True, slug_field='public_id')
+    registrationId = serializers.CharField(source='public_id', read_only=True)
+    teamId = serializers.SlugRelatedField(source='team', read_only=True, slug_field='public_id')
     
     class Meta:
         model = TeamEventRegistration
-        fields = ['registration_id', 'team_id', 'status']
+        fields = ['registrationId', 'teamId', 'status']
 
 
 # This Serializer is To List all Registrations for a Team Event
 class TeamEventRegistrationsSerializer(serializers.ModelSerializer):
+    eventPublicId = serializers.CharField(source='public_id', read_only=True)
+    eventType = serializers.CharField(source='event_type', read_only=True)
     registrations = TeamEventRegistrationSerializer(source='teameventregistration_set', many=True)
 
     class Meta:
         model = TeamEvent
-        fields = ['public_id', 'event_type', 'registrations']
+        fields = ['eventPublicId', 'eventType', 'registrations']
 
 
 class SoloEventRegistrationSerializer(serializers.ModelSerializer):
-    registration_id = serializers.CharField(source='public_id', read_only=True)
-    user_id = serializers.SlugRelatedField(source='profile', read_only=True, slug_field='get_user_username')
+    registrationId = serializers.CharField(source='public_id', read_only=True)
+    userId = serializers.SlugRelatedField(source='profile', read_only=True, slug_field='get_user_username')
 
     class Meta:
         model = SoloEventRegistration
-        fields = ['registration_id', 'user_id', 'status']
+        fields = ['registrationId', 'userId', 'status']
 
 
 # This Serializer is To List all Registrations for a Solo Event
 class SoloEventRegistrationsSerializer(serializers.ModelSerializer):
+    eventPublicId = serializers.CharField(source='public_id', read_only=True)
+    eventType = serializers.CharField(source='event_type', read_only=True)
     registrations = SoloEventRegistrationSerializer(source='soloeventregistration_set', many=True)
 
     class Meta:
         model = SoloEvent
-        fields = ['public_id', 'event_type', 'registrations']
+        fields = ['eventPublicId', 'eventType', 'registrations']
+
