@@ -32,11 +32,11 @@ class TeamDetailEditDeleteView(APIView):
             team = Team.objects.get(public_id=public_id)
             if team.leader != request.user and not request.user.is_staff:
                 return Response({'error': 'This Team is not yours to delete'}, status=status.HTTP_403_FORBIDDEN)
-            if team.events.count() == 0:
+            if team.events.count() is not 0:
                 return Response({'error': 'Can\'t delete a registered team.'}, status=status.HTTP_403_FORBIDDEN)
             team.delete()
         except Team.DoesNotExist:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'error': 'Team does not exist'}, status=status.HTTP_204_NO_CONTENT)
         return Response({'message': 'Team Deleted'}, status=status.HTTP_200_OK)
 
     def put(self, request, public_id, format=None):
