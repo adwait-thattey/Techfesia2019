@@ -32,6 +32,37 @@ class TeamTestCase(TestCase):
     def test_team_create_date(self):
         self.assertEqual(self.team.create_date, dt.datetime.now(tz=self.team.create_date.tzinfo))
 
+    def test_reservation_status(self):
+        self.assertTrue(self.team.is_reserved)
+
+        self.user2 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser2@test.com'
+                                         )
+        self.profile2 = Profile.objects.create(user=self.user2,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+        self.institute2 = Institute.objects.create(name='Sample Institute 2')
+        self.team_member = TeamMember.objects.create(team=self.team, profile=self.profile2)
+
+        self.assertTrue(self.team.is_reserved)
+
+        self.profile2.college = self.institute2
+        self.profile2.save()
+
+        self.assertFalse(self.team.is_reserved)
+
+        self.profile = self.institute2
+        self.profile.save()
+
+        self.assertFalse(self.team.is_reserved)
+
+        self.team_member.profile.college = self.institute
+
+        self.assertFalse(self.team.is_reserved)
+
 
 class TeamMemberTestCase(TestCase):
     def setUp(self):
