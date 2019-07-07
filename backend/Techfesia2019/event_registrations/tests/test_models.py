@@ -143,10 +143,6 @@ class SoloEventRegistrationTestCase(TestCase):
                                               phone_number='+991234567890'
                                               )
 
-        self.team = Team.objects.create(team_leader=self.profile,
-                                        name='Sample Team1'
-                                        )
-
         self.event = SoloEvent.objects.create(title='Sample Solo Event',
                                               start_date=dt.date(2019, 7, 1),
                                               end_date=dt.date(2019, 7, 1),
@@ -175,4 +171,11 @@ class SoloEventRegistrationTestCase(TestCase):
         self.assertGreaterEqual(self.registration.created_on,
                                 dt.datetime.now(tz=self.registration.created_on.tzinfo) - dt.timedelta(0, 5, 0))
 
-
+    def test_status(self):
+        self.assertEqual(self.registration.status, 'payment pending')
+        self.registration.is_complete = True
+        self.registration.save()
+        self.assertEqual(self.registration.status, 'waiting')
+        self.registration.is_confirmed = True
+        self.registration.save()
+        self.assertEqual(self.registration.status, 'confirmed')

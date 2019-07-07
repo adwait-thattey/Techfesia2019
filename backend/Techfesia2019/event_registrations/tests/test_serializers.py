@@ -1,8 +1,10 @@
 from django.test import TestCase
 from registration.models import User
 from accounts.models import Profile, Institute
-from event_registrations.models import Team, TeamMember
-from event_registrations.serializers import TeamSerializer, TeamMemberSerializer
+from events.models import SoloEvent
+from event_registrations.models import Team, TeamMember, SoloEventRegistration
+from event_registrations.serializers import TeamSerializer, TeamMemberSerializer, SoloEventRegistrationSerializer
+import datetime as dt
 
 
 class TeamSerializerTestCase(TestCase):
@@ -160,3 +162,50 @@ class TeamMemberSerializerTestCase(TestCase):
     def test_team_status(self):
         self.assertEqual(self.test_data1['status'], self.serializer1['status'].value)
         self.assertEqual(self.test_data2['status'], self.serializer2['status'].value)
+
+
+class SoloEventRegistrationSerializerTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+
+        self.event = SoloEvent.objects.create(title='Sample Solo Event',
+                                              start_date=dt.date(2019, 7, 1),
+                                              end_date=dt.date(2019, 7, 1),
+                                              start_time=dt.time(12, 0, 0),
+                                              end_time=dt.time(15, 0, 0)
+                                              )
+        is_reserved = self.profile.college.name == 'Indian Institute of Information Technology, Sri City'
+        self.registration = SoloEventRegistration.objects.create(event=self.event,
+                                                                 profile=self.profile,
+                                                                 is_reserved=is_reserved,
+                                                                 )
+        self.serializer = SoloEventRegistrationSerializer(instance=self.registration)
+        self.test_data = {
+            'registrationId': self.registration.public_id,
+            'userId': 'sample_test_user1',
+            'status': 'payment pending',
+        }
+
+    def test_contains_all_fields(self):
+        self.assertCountEqual(set(self.serializer.data.keys()), set(self.test_data.keys()))
+
+    def test_registration_id(self):
+        self.assertEqual(self.test_data['registrationId'], self.serializer['registrationId'].value)
+
+    def test_user_id(self):
+        self.assertEqual(self.test_data['userId'], self.serializer['userId'].value)
+
+    def test_status(self):
+        self.assertEqual(self.test_data['status'], self.serializer['status'].value)
+
