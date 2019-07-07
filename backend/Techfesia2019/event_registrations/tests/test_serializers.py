@@ -1,5 +1,4 @@
 from django.test import TestCase
-from rest_framework.renderers import JSONRenderer
 from registration.models import User
 from accounts.models import Profile, Institute
 from event_registrations.models import Team, TeamMember

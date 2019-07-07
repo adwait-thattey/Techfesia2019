@@ -1,6 +1,7 @@
 from django.test import TestCase
-from event_registrations.models import Team, TeamMember
+from event_registrations.models import Team, TeamMember, SoloEventRegistration
 from accounts.models import Profile, Institute
+from events.models import SoloEvent
 from registration.models import User
 import datetime as dt
 
@@ -30,7 +31,8 @@ class TeamTestCase(TestCase):
         self.assertTrue(Team.objects.filter(team_leader=self.profile, name='Sample Team1').exists())
 
     def test_team_create_date(self):
-        self.assertGreaterEqual(self.team.create_date, dt.datetime.now(tz=self.team.create_date.tzinfo) - dt.timedelta(0, 5, 0))
+        self.assertGreaterEqual(self.team.create_date,
+                                dt.datetime.now(tz=self.team.create_date.tzinfo) - dt.timedelta(0, 5, 0))
 
     def test_reservation_status(self):
         self.assertTrue(self.team.is_reserved)
@@ -124,4 +126,53 @@ class TeamMemberTestCase(TestCase):
         self.assertEqual(self.team_member.status, 'accepted')
         self.assertTrue(self.team.members.filter(profile=self.profile2).exists())
         self.assertFalse(self.team.invitees.filter(profile=self.profile2).exists())
+
+
+class SoloEventRegistrationTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+
+        self.event = SoloEvent.objects.create(title='Sample Solo Event',
+                                              start_date=dt.date(2019, 7, 1),
+                                              end_date=dt.date(2019, 7, 1),
+                                              start_time=dt.time(12, 0, 0),
+                                              end_time=dt.time(15, 0, 0)
+                                              )
+        is_reserved = self.profile.college.name == 'Indian Institute of Information Technology, Sri City'
+        self.registration = SoloEventRegistration.objects.create(event=self.event,
+                                                                 profile=self.profile,
+                                                                 is_reserved=is_reserved,
+                                                                 )
+
+    def test_model_creation(self):
+        self.assertTrue(SoloEventRegistration.objects.filter(event=self.event, profile=self.profile).exists())
+
+    def test_is_reserved(self):
+        self.assertEqual(self.registration.is_reserved, True)
+
+    def test_is_confirmed(self):
+        self.assertFalse(self.registration.is_confirmed)
+
+    def test_is_complete(self):
+        self.assertFalse(self.registration.is_complete)
+
+    def test_created_on(self):
+        self.assertGreaterEqual(self.registration.created_on,
+                                dt.datetime.now(tz=self.registration.created_on.tzinfo) - dt.timedelta(0, 5, 0))
+
 
