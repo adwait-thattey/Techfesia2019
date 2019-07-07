@@ -76,16 +76,16 @@ class SoloEvent(Event):
         return 'single'
 
     def current_participants(self):
-        return self.soloeventregistration_set.filter(is_complete=True)
+        return self.soloeventregistration_set.filter(is_confirmed=True)
 
     def current_waiting_participants(self):
-        return self.soloeventregistration_set.filter(is_complete=False, is_confirmed=True)
+        return self.soloeventregistration_set.filter(is_complete=True, is_confirmed=False)
 
     def current_reserved_participants(self):
-        return self.soloeventregistration_set.filter(is_complete=True, is_reserved=True)
+        return self.soloeventregistration_set.filter(is_confirmed=True, is_reserved=True)
 
     def current_waiting_reserved_participants(self):
-        return self.soloeventregistration_set.filter(is_complete=False, is_confirmed=True, is_reserved=True)
+        return self.soloeventregistration_set.filter(is_complete=True, is_confirmed=False, is_reserved=True)
 
     def refresh_participants(self):
         total_seats = self.max_participants
@@ -95,7 +95,7 @@ class SoloEvent(Event):
             # If reserved seats are available
             if self.current_reserved_participants().count() < total_reserved_seats:
                 registration = self.current_waiting_reserved_participants().order_by('created_on')[0]
-                registration.is_complete = True
+                registration.is_confirmed = True
                 registration.save()
             else:
                 break
@@ -105,7 +105,7 @@ class SoloEvent(Event):
                 # Consider all registrations general
                 if self.current_participants().count() < total_seats:
                     registration = self.current_waiting_participants().order_by('created_on')[0]
-                    registration.is_complete = True
+                    registration.is_confirmed = True
                     registration.save()
                 else:
                     break
@@ -114,7 +114,7 @@ class SoloEvent(Event):
                 # Leave seats for Reserved Candidates
                 if self.current_participants().filter(is_reserved=False).count() < total_seats - total_reserved_seats:
                     registration = self.current_waiting_participants().order_by('created_on')[0]
-                    registration.is_complete = True
+                    registration.is_confirmed = True
                     registration.save()
                 else:
                     break
@@ -138,16 +138,16 @@ class TeamEvent(Event):
             return self.teameventregistration_set.filter(team__team_leader__user=user)[0]
 
     def current_participants(self):
-        return self.teameventregistration_set.filter(is_complete=True)
+        return self.teameventregistration_set.filter(is_confirmed=True)
 
     def current_waiting_participants(self):
-        return self.teameventregistration_set.filter(is_complete=False, is_confirmed=True)
+        return self.teameventregistration_set.filter(is_confirmed=False, is_complete=True)
 
     def current_reserved_participants(self):
-        return self.teameventregistration_set.filter(is_complete=True, is_reserved=True)
+        return self.teameventregistration_set.filter(is_confirmed=True, is_reserved=True)
 
     def current_waiting_reserved_participants(self):
-        return self.teameventregistration_set.filter(is_complete=False, is_confirmed=True, is_reserved=True)
+        return self.teameventregistration_set.filter(is_confirmed=False, is_complete=True, is_reserved=True)
 
     def refresh_participants(self):
         total_seats = self.max_participants
@@ -157,7 +157,7 @@ class TeamEvent(Event):
             # If reserved seats are available
             if self.current_reserved_participants().count() < total_reserved_seats:
                 registration = self.current_waiting_reserved_participants().order_by('created_on')[0]
-                registration.is_complete = True
+                registration.is_confirmed = True
                 registration.save()
             else:
                 break
@@ -167,7 +167,7 @@ class TeamEvent(Event):
                 # Consider all registrations general
                 if self.current_participants().count() < total_seats:
                     registration = self.current_waiting_participants().order_by('created_on')[0]
-                    registration.is_complete = True
+                    registration.is_confirmed = True
                     registration.save()
                 else:
                     break
@@ -176,7 +176,7 @@ class TeamEvent(Event):
                 # Leave seats for Reserved Candidates
                 if self.current_participants().filter(is_reserved=False).count() < total_seats - total_reserved_seats:
                     registration = self.current_waiting_participants().order_by('created_on')[0]
-                    registration.is_complete = True
+                    registration.is_confirmed = True
                     registration.save()
                 else:
                     break
