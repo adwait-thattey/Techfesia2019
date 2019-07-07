@@ -21,7 +21,7 @@ class TeamSerializer(serializers.ModelSerializer):
 class TeamMemberSerializer(serializers.ModelSerializer):
     leader = serializers.SlugRelatedField(read_only=True, slug_field='get_user_username')
     name = serializers.CharField(source='team_name', read_only=True)
-    teamId = serializers.SlugRelatedField(read_only=True, slug_field='public_id')
+    teamId = serializers.SlugRelatedField(source='team', read_only=True, slug_field='public_id')
 
     class Meta:
         model = TeamMember
