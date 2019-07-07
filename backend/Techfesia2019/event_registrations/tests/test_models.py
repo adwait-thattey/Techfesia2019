@@ -30,7 +30,7 @@ class TeamTestCase(TestCase):
         self.assertTrue(Team.objects.filter(team_leader=self.profile, name='Sample Team1').exists())
 
     def test_team_create_date(self):
-        self.assertGreaterEqual(self.team.create_date, dt.datetime.now(tz=self.team.create_date.tzinfo) - dt.timedelta(0,0,5))
+        self.assertGreaterEqual(self.team.create_date, dt.datetime.now(tz=self.team.create_date.tzinfo) - dt.timedelta(0, 5, 0))
 
     def test_reservation_status(self):
         self.assertTrue(self.team.is_reserved)
