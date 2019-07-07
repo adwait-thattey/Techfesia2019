@@ -30,7 +30,7 @@ class TeamTestCase(TestCase):
         self.assertTrue(Team.objects.filter(team_leader=self.profile, name='Sample Team1').exists())
 
     def test_team_create_date(self):
-        self.assertEqual(self.team.create_date, dt.datetime.now(tz=self.team.create_date.tzinfo))
+        self.assertGreaterEqual(self.team.create_date, dt.datetime.now(tz=self.team.create_date.tzinfo) - dt.timedelta(0,0,5))
 
     def test_reservation_status(self):
         self.assertTrue(self.team.is_reserved)
@@ -112,12 +112,15 @@ class TeamMemberTestCase(TestCase):
 
     def test_rejected_status(self):
         self.team_member.invitation_rejected = True
+        self.team_member.invitation_accepted = False
+        self.team_member.save()
         self.assertEqual(self.team_member.status, 'rejected')
         self.assertFalse(self.team.members.filter(profile=self.profile2).exists())
         self.assertTrue(self.team.invitees.filter(profile=self.profile2).exists())
 
     def test_accepted_status(self):
         self.team_member.invitation_accepted = True
+        self.team_member.save()
         self.assertEqual(self.team_member.status, 'accepted')
         self.assertTrue(self.team.members.filter(profile=self.profile2).exists())
         self.assertFalse(self.team.invitees.filter(profile=self.profile2).exists())
