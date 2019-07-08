@@ -128,10 +128,10 @@ class TeamMemberTestCase(TestCase):
         self.assertFalse(self.team.invitees.filter(profile=self.profile2).exists())
 
     def test_team_size(self):
-        self.assertEqual(self.team.member_count, 0)
+        self.assertEqual(self.team.member_count, 1)
         self.team_member.invitation_accepted = True
         self.team_member.save()
-        self.assertEqual(self.team.member_count, 1)
+        self.assertEqual(self.team.member_count, 2)
 
     def test_team_ready(self):
         self.assertFalse(self.team.ready(), 0)
