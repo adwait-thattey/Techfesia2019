@@ -62,7 +62,7 @@ class TeamDetailEditDeleteView(APIView):
 
 
 class TeamListCreateView(APIView):
-    permission_classes = (IsAuthenticatedOrPost,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, format=None):
         teams = Team.objects.all()
