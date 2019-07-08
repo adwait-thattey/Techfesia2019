@@ -47,7 +47,7 @@ class Team(models.Model):
 
     @property
     def member_count(self):
-        return self.teammember_set.filter(invitation_accepted=True).count()
+        return 1 + self.teammember_set.filter(invitation_accepted=True).count()
 
     @property
     def is_reserved(self):
