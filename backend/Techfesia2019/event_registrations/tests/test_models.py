@@ -1,7 +1,7 @@
 from django.test import TestCase
-from event_registrations.models import Team, TeamMember, SoloEventRegistration
+from event_registrations.models import Team, TeamMember, SoloEventRegistration, TeamEventRegistration
 from accounts.models import Profile, Institute
-from events.models import SoloEvent
+from events.models import SoloEvent, TeamEvent
 from registration.models import User
 import datetime as dt
 
@@ -127,6 +127,18 @@ class TeamMemberTestCase(TestCase):
         self.assertTrue(self.team.members.filter(profile=self.profile2).exists())
         self.assertFalse(self.team.invitees.filter(profile=self.profile2).exists())
 
+    def test_team_size(self):
+        self.assertEqual(self.team.member_count, 0)
+        self.team_member.invitation_accepted = True
+        self.team_member.save()
+        self.assertEqual(self.team.member_count, 1)
+
+    def test_team_ready(self):
+        self.assertFalse(self.team.ready(), 0)
+        self.team_member.invitation_accepted = True
+        self.team_member.save()
+        self.assertTrue(self.team.ready())
+
 
 class SoloEventRegistrationTestCase(TestCase):
     def setUp(self):
@@ -157,6 +169,88 @@ class SoloEventRegistrationTestCase(TestCase):
 
     def test_model_creation(self):
         self.assertTrue(SoloEventRegistration.objects.filter(event=self.event, profile=self.profile).exists())
+
+    def test_is_reserved(self):
+        self.assertEqual(self.registration.is_reserved, True)
+
+    def test_is_confirmed(self):
+        self.assertFalse(self.registration.is_confirmed)
+
+    def test_is_complete(self):
+        self.assertFalse(self.registration.is_complete)
+
+    def test_created_on(self):
+        self.assertGreaterEqual(self.registration.created_on,
+                                dt.datetime.now(tz=self.registration.created_on.tzinfo) - dt.timedelta(0, 5, 0))
+
+    def test_status(self):
+        self.assertEqual(self.registration.status, 'payment pending')
+        self.registration.is_complete = True
+        self.registration.save()
+        self.assertEqual(self.registration.status, 'waiting')
+        self.registration.is_confirmed = True
+        self.registration.save()
+        self.assertEqual(self.registration.status, 'confirmed')
+
+
+class TeamEventRegistrationTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user1',
+                                        email='sampleuser1@test.com'
+                                        )
+
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser2@test.com'
+                                         )
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user3',
+                                         email='sampleuser3@test.com'
+                                         )
+
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+
+        self.profile2 = Profile.objects.create(user=self.user2,
+                                               college=self.institute,
+                                               phone_number='+991234567892'
+                                               )
+
+        self.event = TeamEvent.objects.create(title='Sample Solo Event',
+                                              start_date=dt.date(2019, 7, 1),
+                                              end_date=dt.date(2019, 7, 1),
+                                              start_time=dt.time(12, 0, 0),
+                                              end_time=dt.time(15, 0, 0),
+                                              max_team_size=4,
+                                              min_team_size=2
+                                              )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile1, invitation_accepted=True)
+        self.team_member2 = TeamMember.objects.create(team=self.team, profile=self.profile2, invitation_accepted=True)
+
+        self.registration = TeamEventRegistration.objects.create(team=self.team, event=self.event,
+                                                                 is_reserved=self.team.is_reserved
+                                                                 )
+
+    def test_model_creation(self):
+        self.assertTrue(TeamEventRegistration.objects.filter(event=self.event, team=self.team).exists())
 
     def test_is_reserved(self):
         self.assertEqual(self.registration.is_reserved, True)
