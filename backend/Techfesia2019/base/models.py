@@ -1,4 +1,6 @@
 import os
+
+from django.core.exceptions import ValidationError
 from django.db import models
 
 # Create your models here.
@@ -20,3 +22,9 @@ class FileUploadModel(models.Model):
     forced_filename = models.CharField(max_length=80, null=True, blank=True)
     uploaded_file = models.FileField(upload_to=set_file_upload_path)
     additional_info = models.TextField(null=True, blank=True)
+
+    def clean(self):
+        if self.upload_path[0] == '/':
+            raise ValidationError({
+                'upload_path':"Absolute paths are not allowed. If you are passing relative paths, remove the preceding '/'"
+            })
