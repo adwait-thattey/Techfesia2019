@@ -176,6 +176,8 @@ class TeamInvitationCreateView(APIView):
         if TeamMember.objects.filter(team=team, profile=profile).count() is not 0:
             return Response({'error': 'User Already Invited '}, status=status.HTTP_400_BAD_REQUEST)
         if team.leader == request.user and profile:
+            if team.team_leader == profile:
+                return Response({'error': 'You can not invite yourself'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             team_member = TeamMember()
             team_member.team = team
             team_member.profile = profile
