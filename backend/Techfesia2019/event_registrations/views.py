@@ -33,7 +33,12 @@ class TeamDetailEditDeleteView(APIView):
             if team.leader != request.user and not request.user.is_staff:
                 return Response({'error': 'This Team is not yours to delete'}, status=status.HTTP_403_FORBIDDEN)
             if team.events.count() is not 0:
-                return Response({'error': 'Can\'t delete a registered team.'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'error': 'Can\'t delete a registered team.'},
+                                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                                )
+            # Cleaning up TeamMembers models
+            for member in TeamMember.objects.filter(team=team):
+                member.delete()
             team.delete()
         except Team.DoesNotExist:
             return Response({'error': 'Team does not exist'}, status=status.HTTP_204_NO_CONTENT)
@@ -256,6 +261,14 @@ class EventRegistrationView(APIView):
 
             except Team.DoesNotExist:
                 return Response({'error': 'Team does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if event.min_team_size <= team.member_count <= event.max_team_size:
+                pass
+            else:
+                return Response({'error': 'Team size is not '}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+            if not team.ready():
+                return Response({'error': 'Team has pending invitations'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
             # 3. Check for existing registration
             team_members = [team.team_leader.user, ] + [i.profile.user for i in team.teammember_set.all()]
