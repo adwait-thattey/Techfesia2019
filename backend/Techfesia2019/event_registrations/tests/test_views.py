@@ -779,8 +779,89 @@ class TeamInvitationCreateViewTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
+class TeamInvitationDeleteViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user1',
+                                         email='sampleuser2@test.com'
+                                         )
 
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser3@test.com'
+                                         )
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+        self.institute = Institute.objects.create()
 
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile1)
+
+    def test_team_invitation_delete_view_unauthenticated(self):
+        url = reverse('delete_invitation', args=(self.team.public_id, self.user1.username,))
+        self.client.login(user=None)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_team_invitation_delete_view_wrong_user(self):
+        url = reverse('delete_invitation', args=(self.team.public_id, self.user1.username,))
+        self.client.force_login(user=self.user1)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_delete_view_profile_not_complete(self):
+        url = reverse('delete_invitation', args=(self.team.public_id, self.user2.username,))
+        self.client.force_login(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_invitation_delete_view_team_does_not_exist(self):
+        url = reverse('delete_invitation', args=('random_string', self.user1.username,))
+        self.client.force_login(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_team_invitation_delete_view_user_does_not_exist(self):
+        url = reverse('delete_invitation', args=(self.team.public_id, 'random_string',))
+        self.client.force_login(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_team_invitation_delete_view_invitation_accepted(self):
+        self.team_member1.invitation_accepted = True
+        self.team_member1.save()
+        url = reverse('delete_invitation', args=(self.team.public_id, self.user1.username,))
+        self.client.force_login(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_invitation_delete_view(self):
+        url = reverse('delete_invitation', args=(self.team.public_id, self.user1.username,))
+        self.client.force_login(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 

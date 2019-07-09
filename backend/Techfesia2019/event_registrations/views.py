@@ -216,15 +216,26 @@ class TeamInvitationDeleteView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def delete(self, request, public_id, username, format=None):
-        profile = Profile.objects.get(user__username=username)
-        team = Team.objects.get(public_id=public_id)
+        try:
+            user = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user)
+        except User.DoesNotExist:
+            return Response({'error': 'user does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        except Profile.DoesNotExist:
+            return Response({'error': 'Profile is not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            team = Team.objects.get(public_id=public_id)
+        except Team.DoesNotExist:
+            return Response({'error': 'Team does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if not request.user == team.team_leader.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             team_member = TeamMember.objects.get(team=team, profile=profile)
         except TeamMember.DoesNotExist:
             return Response({'error': 'Doesn\'t Exist'}, status=status.HTTP_204_NO_CONTENT)
         if not team_member.invitation_accepted and team.leader == request.user:
             team_member.delete()
-            return Response({'message': 'Invitation Deleted'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'message': 'Invitation Deleted'}, status=status.HTTP_200_OK)
         return Response({'error': 'Already Accepted, Try Deleting Member'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
