@@ -19,7 +19,6 @@ class TicketCreateListView(APIView):
 
     def get(self, request, username=None, format=None):
         tickets = Ticket.objects.all()
-        print(tickets)
         if username and (request.user.username == username or request.user.is_staff):
             tickets = tickets.filter(opened_by__user__username=username)
         if not request.user.is_staff:
@@ -53,6 +52,19 @@ class TicketCreateListView(APIView):
         ticket.save()
         serializer = TicketSerializer(ticket)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TicketDetailView(APIView):
+    def get(self, request, public_id, format=None):
+        try:
+            ticket = Ticket.objects.get(public_id=public_id)
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if ticket.is_public or ticket.opened_by.user == request.user:
+            serializer = TicketSerializer(ticket)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class TicketCloseView(APIView):
@@ -136,3 +148,40 @@ class TicketCommentDetailUpdateDeleteView(APIView):
             return Response({'error': 'Comment Not Found'}, status=status.HTTP_204_NO_CONTENT)
         comment.delete()
         return Response({'message': 'Comment Deleted'}, status=status.HTTP_200_OK)
+
+
+class TicketSubscribeView(APIView):
+    def put(self, request, public_id, format=None):
+        try:
+            ticket = Ticket.objects.get(public_id=public_id)
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if not ticket.is_public:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        try:
+            ticket.subscribers.add(request.user.profile)
+            ticket.save()
+        except Profile.DoesNotExist:
+            return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response({'message': 'subscribed to ticket'}, status=status.HTTP_200_OK)
+
+
+class TicketUnsubscribeView(APIView):
+    def put(self, request, public_id, format=None):
+        try:
+            ticket = Ticket.objects.get(public_id=public_id)
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if not ticket.is_public:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        try:
+            if not ticket.subscribers.filter(user=request.user).exists():
+                return Response({'error': 'You are not subscribed to this ticket'},
+                                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                                )
+
+            ticket.subscribers.remove(request.user.profile)
+            ticket.save()
+        except Profile.DoesNotExist:
+            return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response({'message': 'unsubscribed from ticket'}, status=status.HTTP_200_OK)
