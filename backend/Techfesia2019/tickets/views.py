@@ -19,20 +19,23 @@ class TicketCreateListView(APIView):
 
     def get(self, request, username=None, format=None):
         tickets = Ticket.objects.all()
-        if username and (request.user.username == username or request.user.is_staff):
-            tickets = tickets.filter(opened_by__user__username=username)
-        if not request.user.is_staff:
-            profile = Profile.objects.get(user=request.user)
-            tickets = tickets.filter(opened_by=profile)
-        q_status, q_user, q_event = request.GET.get('status'), request.GET.get('user'), request.GET.get('event')
-        if q_user and request.user.is_staff:
-            tickets = tickets.filter(opened_by=Profile.objects.get(user=User.objects.get(username=q_user)))
-        if q_status:
-            tickets = tickets.filter(status=q_status)
-        if q_event:
-            tickets = tickets.filter(event__public_id=q_event)
+        if request.user.is_staff:
+            if username:
+                tickets = tickets.filter(opened_by__user__username=username)
+            q_status, q_user, q_event = request.GET.get('status'), request.GET.get('user'), request.GET.get('event')
+            if q_user and request.user.is_staff:
+                tickets = tickets.filter(opened_by=Profile.objects.get(user=User.objects.get(username=q_user)))
+            if q_status:
+                tickets = tickets.filter(status=q_status)
+            if q_event:
+                tickets = tickets.filter(event__public_id=q_event)
+        else:
+            if username == request.user.username:
+                profile = Profile.objects.get(user=request.user)
+                tickets = tickets.filter(opened_by=profile)
+            else:
+                return Response(status=status.HTTP_403_FORBIDDEN)
         serializer = TicketSerializer(tickets, many=True)
-        print(tickets)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
@@ -44,7 +47,6 @@ class TicketCreateListView(APIView):
             ticket.description = data['description']
         except KeyError:
             return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
-        print(data.get('view'), data.get('view') == 'private')
         if data.get('view') == 'private':
             ticket.is_public = False
         if data.get('event'):
