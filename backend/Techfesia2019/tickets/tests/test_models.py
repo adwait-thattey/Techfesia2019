@@ -34,6 +34,9 @@ class TicketModelTestCase(TestCase):
     def test_self_opening_date(self):
         self.assertEqual(self.ticket.opening_date, dt.date.today())
 
+    def test_owner(self):
+        self.assertEqual(self.ticket.owner, self.user)
+
 
 class TicketCommentModelTestCase(TestCase):
     def setUp(self):
@@ -74,8 +77,8 @@ class TicketCommentModelTestCase(TestCase):
         self.assertTrue(TicketComment.objects.filter(ticket=self.ticket, commenter=self.profile1).exists())
 
     def test_posting_date(self):
-        self.assertGreaterEqual(self.ticket_comment.posting_date, dt.datetime.now(tz=self.ticket_comment.posting_date.tzinfo)
-                         - dt.timedelta(0, 5, 0))
+        self.assertGreaterEqual(self.ticket_comment.posting_date,
+                                dt.datetime.now(tz=self.ticket_comment.posting_date.tzinfo) - dt.timedelta(0, 5, 0))
 
     def test_comments_for_ticket(self):
         self.assertTrue(self.ticket.comments.filter(commenter=self.profile1).exists())
