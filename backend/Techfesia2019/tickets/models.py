@@ -74,7 +74,8 @@ class TicketComment(models.Model):
                                  )
 
     ticket = models.ForeignKey(to=Ticket,
-                               on_delete=models.CASCADE
+                               on_delete=models.CASCADE,
+                               related_name='comments'
                                )
 
     commenter = models.ForeignKey(to='accounts.Profile',
