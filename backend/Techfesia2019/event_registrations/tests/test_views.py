@@ -229,8 +229,14 @@ class TeamListCreateViewTestCase(APITestCase):
                                         )
         self.user1 = User.objects.create(username='sample_test_user2',
                                          first_name='sample',
-                                         last_name='user2',
+                                         last_name='user1',
                                          email='sampleuser2@test.com'
+                                         )
+
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser3@test.com'
                                          )
         self.staff_user = User.objects.create(username='staff',
                                               first_name='staff',
@@ -291,7 +297,11 @@ class TeamListCreateViewTestCase(APITestCase):
         response = self.client.post(url, json.dumps({'name': 'Sample Team1'}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # TODO: def test_team_create_view_profile_not_complete(self):
+    def test_team_create_view_profile_not_complete(self):
+        url = reverse('teams_list_create')
+        self.client.force_login(user=self.user2)
+        response = self.client.post(url, json.dumps({'name': 'Sample Team3'}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_team_create_view(self):
         url = reverse('teams_list_create')
@@ -307,16 +317,357 @@ class TeamListCreateViewTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_team_list_view_user(self):
-            url = reverse('teams_list_create')
-            self.client.force_login(user=self.user)
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('teams_list_create')
+        self.client.force_login(user=self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_team_list_view_staff_user(self):
-            url = reverse('teams_list_create')
-            self.client.force_login(user=self.staff_user)
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('teams_list_create')
+        self.client.force_login(user=self.staff_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_team_list_view_profile_not_complete(self):
+        url = reverse('teams_list_create')
+        self.client.force_login(user=self.user2)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+class TeamInvitationListViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user1',
+                                         email='sampleuser2@test.com'
+                                         )
+
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser3@test.com'
+                                         )
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+
+        self.event = TeamEvent.objects.create(title='Sample Solo Event',
+                                              start_date=dt.date(2019, 7, 1),
+                                              end_date=dt.date(2019, 7, 1),
+                                              start_time=dt.time(12, 0, 0),
+                                              end_time=dt.time(15, 0, 0),
+                                              max_team_size=4,
+                                              min_team_size=2
+                                              )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+        self.team1 = Team.objects.create(team_leader=self.profile1,
+                                         name='Sample Team2'
+                                         )
+
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile1,
+                                                      invitation_accepted=True)
+        self.team1_member1 = TeamMember.objects.create(team=self.team1, profile=self.profile)
+
+        self.registration = TeamEventRegistration.objects.create(team=self.team, event=self.event,
+                                                                 is_reserved=self.team.is_reserved
+                                                                 )
+
+    def test_team_invitation_list_view_unauthenticated(self):
+        url = reverse('list_invitation', args=(self.user.username,))
+        self.client.login(user=None)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_team_invitation_list_view_wrong_user(self):
+        url = reverse('list_invitation', args=(self.user.username,))
+        self.client.force_login(user=self.user1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_list_view_profile_not_complete(self):
+        url = reverse('list_invitation', args=(self.user2.username,))
+        self.client.force_login(user=self.user2)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_invitation_list_view(self):
+        url = reverse('list_invitation', args=(self.user.username,))
+        self.client.force_login(user=self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class TeamInvitationDetailViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user1',
+                                         email='sampleuser2@test.com'
+                                         )
+
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser3@test.com'
+                                         )
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile1,
+                                                      invitation_accepted=True)
+
+    def test_team_invitation_detail_view_unauthenticated(self):
+        url = reverse('invitation_detail', args=(self.user1.username, self.team.public_id))
+        self.client.login(user=None)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_team_invitation_detail_view_wrong_user(self):
+        url = reverse('invitation_detail', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_detail_view_wrong_username(self):
+        url = reverse('invitation_detail', args=(self.user.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_detail_view_does_not_exist(self):
+        url = reverse('invitation_detail', args=(self.user1.username, 'random_string'))
+        self.client.force_login(user=self.user1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_team_invitation_detail_view_profile_not_complete(self):
+        url = reverse('invitation_detail', args=(self.user2.username, self.team.public_id))
+        self.client.force_login(user=self.user2)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_invitation_detail_view(self):
+        test_data = {
+            'teamId': self.team.public_id,
+            'name': self.team.name,
+            'leader': self.user.username,
+            'status': 'accepted'
+        }
+        url = reverse('invitation_detail', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(test_data['teamId'], response.data['teamId'])
+        self.assertEqual(test_data['leader'], response.data['leader'])
+        self.assertEqual(test_data['name'], response.data['name'])
+        self.assertEqual(test_data['status'], response.data['status'])
+
+
+class TeamInvitationAcceptViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user1',
+                                         email='sampleuser2@test.com'
+                                         )
+
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile1)
+
+    def test_team_invitation_accept_view_unauthenticated(self):
+        url = reverse('accept_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.login(user=None)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_team_invitation_accept_view_wrong_user(self):
+        url = reverse('accept_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_accept_view_wrong_username(self):
+        url = reverse('accept_invitation', args=(self.user.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_accept_view_does_not_exist(self):
+        url = reverse('accept_invitation', args=(self.user1.username, 'random_string'))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_team_invitation_accept_view(self):
+        self.assertEqual(self.team_member1.status, 'pending')
+        test_data = {
+            'teamId': self.team.public_id,
+            'name': self.team.name,
+            'leader': self.user.username,
+            'status': 'accepted'
+        }
+        url = reverse('accept_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(test_data['teamId'], response.data['teamId'])
+        self.assertEqual(test_data['leader'], response.data['leader'])
+        self.assertEqual(test_data['name'], response.data['name'])
+        self.assertEqual(test_data['status'], response.data['status'])
+
+
+class TeamInvitationRejectViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user1',
+                                         email='sampleuser2@test.com'
+                                         )
+
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser3@test.com'
+                                         )
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile1)
+
+    def test_team_invitation_reject_view_unauthenticated(self):
+        url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.login(user=None)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_team_invitation_reject_view_wrong_user(self):
+        url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_reject_view_wrong_username(self):
+        url = reverse('reject_invitation', args=(self.user.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_reject_view_does_not_exist(self):
+        url = reverse('reject_invitation', args=(self.user1.username, 'random_string'))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_team_invitation_reject_view(self):
+        self.assertEqual(self.team_member1.status, 'pending')
+        test_data = {
+            'teamId': self.team.public_id,
+            'name': self.team.name,
+            'leader': self.user.username,
+            'status': 'rejected'
+        }
+        url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(test_data['teamId'], response.data['teamId'])
+        self.assertEqual(test_data['leader'], response.data['leader'])
+        self.assertEqual(test_data['name'], response.data['name'])
+        self.assertEqual(test_data['status'], response.data['status'])
+
+
+
+
 
 
 

@@ -67,7 +67,10 @@ class TeamListCreateView(APIView):
     def get(self, request, format=None):
         teams = Team.objects.all()
         if not request.user.is_staff:
-            profile = Profile.objects.get(user=request.user)
+            try:
+                profile = Profile.objects.get(user=request.user)
+            except Profile.DoesNotExist:
+                return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             teams = teams.filter(team_leader=profile)
         serializer = TeamSerializer(teams, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -77,7 +80,7 @@ class TeamListCreateView(APIView):
             user = request.user
             profile = Profile.objects.get(user=user)
         except Profile.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
         data = JSONParser().parse(request)
         try:
@@ -97,11 +100,11 @@ class TeamInvitationListView(APIView):
 
     def get(self, request, username, format=None):
         if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
-            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         invitations = TeamMember.objects.filter(profile=profile)
         serializer = TeamMemberSerializer(invitations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -112,11 +115,11 @@ class TeamInvitationDetailView(APIView):
 
     def get(self, request, username, team_public_id, format=None):
         if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
-            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         try:
             invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
         except TeamMember.DoesNotExist:
@@ -130,12 +133,15 @@ class TeamInvitationAcceptView(APIView):
 
     def put(self, request, username, team_public_id, format=None):
         if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
-            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_400_BAD_REQUEST)
-        invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
+            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
+        except TeamMember.DoesNotExist:
+            return Response({'error': 'Invitation not found'}, status=status.HTTP_404_NOT_FOUND)
         if invitation.invitation_accepted:
             return Response({'error': 'Already Accepted'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         else:
@@ -150,12 +156,15 @@ class TeamInvitationRejectView(APIView):
 
     def put(self, request, username, team_public_id, format=None):
         if not request.user.username == username:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
-            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_400_BAD_REQUEST)
-        invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
+            return Response({'message': 'User Profile is not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
+        except TeamMember.DoesNotExist:
+            return Response({'error': 'Invitation not found'}, status=status.HTTP_404_NOT_FOUND)
         if invitation.invitation_rejected:
             return Response({'error': 'Already Rejected'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         else:
