@@ -566,6 +566,15 @@ class TeamInvitationAcceptViewTestCase(APITestCase):
         response = self.client.put(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_team_invitation_accept_view_already_accepted(self):
+        url = reverse('accept_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual('accepted', response.data['status'])
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
     def test_team_invitation_accept_view(self):
         self.assertEqual(self.team_member1.status, 'pending')
         test_data = {
@@ -648,6 +657,16 @@ class TeamInvitationRejectViewTestCase(APITestCase):
         response = self.client.put(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_team_invitation_reject_view_already_rejected(self):
+        self.assertEqual(self.team_member1.status, 'pending')
+        url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
+        self.client.force_login(user=self.user1)
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual('rejected', response.data['status'])
+        response = self.client.put(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
     def test_team_invitation_reject_view(self):
         self.assertEqual(self.team_member1.status, 'pending')
         test_data = {
@@ -664,6 +683,101 @@ class TeamInvitationRejectViewTestCase(APITestCase):
         self.assertEqual(test_data['leader'], response.data['leader'])
         self.assertEqual(test_data['name'], response.data['name'])
         self.assertEqual(test_data['status'], response.data['status'])
+
+
+class TeamInvitationCreateViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user1',
+                                         email='sampleuser2@test.com'
+                                         )
+
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser3@test.com'
+                                         )
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.create(user=self.user,
+                                              college=self.institute,
+                                              phone_number='+991234567890'
+                                              )
+        self.profile1 = Profile.objects.create(user=self.user1,
+                                               college=self.institute,
+                                               phone_number='+991234567891'
+                                               )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+
+        self.team2 = Team.objects.create(team_leader=self.profile,
+                                         name='Sample Team2'
+                                         )
+
+        self.team_member = TeamMember.objects.create(team=self.team2, profile=self.profile1)
+
+    def test_team_invitation_create_view_unauthenticated(self):
+        url = reverse('create_invitation', args=(self.team.public_id,))
+        self.client.login(user=None)
+        response = self.client.post(url, json.dumps({'username': self.user1.username}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_team_invitation_create_view_wrong_user(self):
+        url = reverse('create_invitation', args=(self.team.public_id,))
+        self.client.force_login(user=self.user1)
+        response = self.client.post(url, json.dumps({'username': self.user.username}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_team_invitation_create_view_team_does_not_exist(self):
+        url = reverse('create_invitation', args=('random_string',))
+        self.client.force_login(user=self.user)
+        response = self.client.post(url, json.dumps({'username': self.user1.username}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_team_invitation_create_view_user_does_not_exist(self):
+        url = reverse('create_invitation', args=(self.team.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.post(url, json.dumps({'username': 'random_username'}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_team_invitation_create_view_user_already_invited(self):
+        url = reverse('create_invitation', args=(self.team2.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.post(url, json.dumps({'username': self.user1.username}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_team_invitation_create_view_no_username_input(self):
+        url = reverse('create_invitation', args=(self.team.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.post(url, json.dumps({}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_team_invitation_create_view_inviting_self(self):
+        url = reverse('create_invitation', args=(self.team.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.post(url, json.dumps({'username': self.user.username}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_invitation_create_view(self):
+        url = reverse('create_invitation', args=(self.team.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.post(url, json.dumps({'username': self.user1.username}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
 
 
 

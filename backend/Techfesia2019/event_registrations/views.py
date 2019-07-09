@@ -4,7 +4,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from registration.models import User
 from accounts.models import Profile
 from events.models import Event, TeamEvent, SoloEvent
 from .models import Team, TeamMember, TeamEventRegistration, SoloEventRegistration
@@ -181,10 +181,18 @@ class TeamInvitationCreateView(APIView):
     def post(self, request, public_id, format=None):
         try:
             username = dict(request.data)['username']
+            user = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user)
         except KeyError:
-            return Response({'error': 'User/Profile does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        profile = Profile.objects.get(user__username=username)
-        team = Team.objects.get(public_id=public_id)
+            return Response({'error': '"username" key not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({'error': 'user does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        except Profile.DoesNotExist:
+            return Response({'error': 'Profile is not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        try:
+            team = Team.objects.get(public_id=public_id)
+        except Team.DoesNotExist:
+            return Response({'error': 'Team does not exist'}, status=status.HTTP_404_NOT_FOUND)
         if team.events.count() is not 0:
             return Response({'error': 'Can\'t add member to a registered team'})
         if TeamMember.objects.filter(team=team, profile=profile).count() is not 0:
