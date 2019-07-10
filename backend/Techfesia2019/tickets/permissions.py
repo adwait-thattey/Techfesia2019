@@ -34,9 +34,9 @@ class IsStaffUserOrOwner(IsStaffUser):
         return super().has_object_permission(request, view, obj) or request.user == obj.owner
 
 
-class IsAuthenticatedOrPost(permissions.IsAuthenticated):
+class IsAuthenticatedOrGet(permissions.IsAuthenticated):
     def has_permission(self, request, view):
-        return super().has_permission(request, view) or request.method == 'POST'
+        return super().has_permission(request, view) or request.method == 'GET'
 
 
 class IsStaffUserOrOwnerOrPost(IsStaffUserOrPost):

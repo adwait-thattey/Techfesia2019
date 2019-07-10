@@ -1,6 +1,6 @@
 import datetime as dt
 from .models import Ticket, TicketComment
-from .permissions import IsStaffUser
+from .permissions import IsStaffUser, IsAuthenticatedOrGet
 from rest_framework.permissions import IsAuthenticated
 from django.db import IntegrityError
 from .serializers import TicketSerializer, TicketCommentSerializer
@@ -76,7 +76,10 @@ class TicketCloseView(APIView):
     permission_classes = (IsStaffUser,)
 
     def put(self, request, public_id, format=None):
-        ticket = Ticket.objects.get(public_id=public_id)
+        try:
+            ticket = Ticket.objects.get(public_id=public_id)
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
         if ticket.status == 'Solved':
             return Response({'error': 'Ticket is already Closed/Solved'}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -105,49 +108,75 @@ class TicketCommentListCreateView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, public_id, format=None):
-        comments = TicketComment.objects.filter(ticket__public_id=public_id)
-        serializer = TicketCommentSerializer(comments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            ticket = Ticket.objects.get(public_id=public_id)
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if ticket.is_public or request.user.is_staff or request.user.profile is ticket.opened_by:
+            comments = TicketComment.objects.filter(ticket=ticket)
+            serializer = TicketCommentSerializer(comments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     def post(self, request, public_id, format=None):
         data = JSONParser().parse(request)
         comment = TicketComment()
         try:
             comment.text = data['text']
-            comment.ticket = Ticket.objects.get(public_id=data['ticket'])
+            comment.ticket = Ticket.objects.get(public_id=public_id)
             comment.commenter = request.user.profile
         except Ticket.DoesNotExist:
-            return Response({'error': 'Ticket Doesn\'t Exist'},status=status.HTTP_204_NO_CONTENT)
+            return Response({'error': 'Ticket Doesn\'t Exist'}, status=status.HTTP_404_NOT_FOUND)
+        except Profile.DoesNotExist:
+            return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except KeyError:
             return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
         comment.save()
         serializer = TicketCommentSerializer(comment)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TicketCommentDetailUpdateDeleteView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrGet,)
 
     def get(self, request, public_id, comment_id, format=None):
         try:
-            comment = TicketComment.objects.get(public_id=comment_id, ticket__public_id=public_id)
+            ticket = Ticket.objects.get(public_id=public_id)
+            comment = TicketComment.objects.get(public_id=comment_id)
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Not Found'}, status=status.HTTP_404_NOT_FOUND)
         except TicketComment.DoesNotExist:
-            return Response({'error': 'Comment Not Found'}, status=status.HTTP_204_NO_CONTENT)
-        serializer = TicketCommentSerializer(comment)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({'error': 'Comment Not Found'}, status=status.HTTP_404_NOT_FOUND)
+        if not ticket.is_public:
+            if str(request.user) == 'AnonymousUser':
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            elif request.user.profile == ticket.opened_by or request.user.is_staff:
+                serializer = TicketCommentSerializer(comment)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            serializer = TicketCommentSerializer(comment)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, public_id, comment_id, format=None):
         data = JSONParser().parse(request)
         try:
-            comment = TicketComment.objects.get(public_id=comment_id, ticket__public_id=public_id)
+            ticket = Ticket.objects.get(public_id=public_id)
+            comment = TicketComment.objects.get(public_id=comment_id)
+            text = data['text']
+        except Ticket.DoesNotExist:
+            return Response({'error': 'Ticket Not Found'}, status=status.HTTP_204_NO_CONTENT)
         except TicketComment.DoesNotExist:
             return Response({'error': 'Comment Not Found'}, status=status.HTTP_204_NO_CONTENT)
-        serializer = TicketCommentSerializer(comment, data=data)
-        if serializer.is_valid():
-            serializer.save()
+        except KeyError:
+            return Response({'error': 'text not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        if ticket.opened_by.user == request.user:
+            comment.text = text
+            comment.save()
+            serializer = TicketCommentSerializer(comment)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     def delete(self, request, public_id, comment_id, format=None):
         try:
