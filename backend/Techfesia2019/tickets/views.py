@@ -188,6 +188,8 @@ class TicketCommentDetailUpdateDeleteView(APIView):
 
 
 class TicketSubscribeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def put(self, request, public_id, format=None):
         try:
             ticket = Ticket.objects.get(public_id=public_id)
@@ -196,7 +198,8 @@ class TicketSubscribeView(APIView):
         if not ticket.is_public:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
-            ticket.subscribers.add(request.user.profile)
+            profile = Profile.objects.get(user=request.user)
+            ticket.subscribers.add(profile)
             ticket.save()
         except Profile.DoesNotExist:
             return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -204,6 +207,8 @@ class TicketSubscribeView(APIView):
 
 
 class TicketUnsubscribeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def put(self, request, public_id, format=None):
         try:
             ticket = Ticket.objects.get(public_id=public_id)
@@ -216,8 +221,8 @@ class TicketUnsubscribeView(APIView):
                 return Response({'error': 'You are not subscribed to this ticket'},
                                 status=status.HTTP_422_UNPROCESSABLE_ENTITY
                                 )
-
-            ticket.subscribers.remove(request.user.profile)
+            profile = Profile.objects.get(user=request.user)
+            ticket.subscribers.remove(profile)
             ticket.save()
         except Profile.DoesNotExist:
             return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
