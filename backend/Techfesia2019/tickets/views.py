@@ -45,8 +45,8 @@ class TicketCreateListView(APIView):
         try:
             ticket.title = data['title']
             ticket.description = data['description']
-        except KeyError:
-            return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
+        except KeyError as key:
+            return Response({'error': 'Missing data ' + str(key)}, status=status.HTTP_400_BAD_REQUEST)
         if data.get('view') == 'private':
             ticket.is_public = False
         if data.get('event'):
@@ -62,10 +62,12 @@ class TicketDetailView(APIView):
             ticket = Ticket.objects.get(public_id=public_id)
         except Ticket.DoesNotExist:
             return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        if ticket.is_public or ticket.opened_by.user == request.user:
+        if ticket.is_public or ticket.opened_by.user == request.user or request.user.is_staff:
             serializer = TicketSerializer(ticket)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
+            if str(request.user) == 'AnonymousUser':
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
             return Response(status=status.HTTP_403_FORBIDDEN)
 
 
