@@ -37,6 +37,10 @@ class TicketModelTestCase(TestCase):
     def test_owner(self):
         self.assertEqual(self.ticket.owner, self.user)
 
+    def test_is_user_subscribed(self):
+        self.ticket.save()
+        self.assertTrue(self.profile in self.ticket.subscribers.all())
+
 
 class TicketCommentModelTestCase(TestCase):
     def setUp(self):
