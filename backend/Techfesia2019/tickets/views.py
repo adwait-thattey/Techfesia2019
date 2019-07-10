@@ -2,6 +2,7 @@ import datetime as dt
 from .models import Ticket, TicketComment
 from .permissions import IsStaffUser
 from rest_framework.permissions import IsAuthenticated
+from django.db import IntegrityError
 from .serializers import TicketSerializer, TicketCommentSerializer
 from events.models import Event
 from accounts.models import Profile
@@ -83,7 +84,10 @@ class TicketCloseView(APIView):
             ticket.solving_date = dt.date.today()
             ticket.status = 'Solved'
             ticket.content = dict(request.data).get('content')
-            ticket.save()
+            try:
+                ticket.save()
+            except IntegrityError:
+                return Response({'error': 'required field "content" not provided'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = TicketSerializer(ticket)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
