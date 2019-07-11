@@ -37,14 +37,12 @@ class TicketCreateListViewTestCase(APITestCase):
                                               min_team_size=2
                                               )
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
@@ -147,14 +145,12 @@ class TicketDetailViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
@@ -197,10 +193,10 @@ class PublicTicketListViewTestCase(APITestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
                                             opened_by=self.profile,
@@ -229,14 +225,13 @@ class TicketCloseViewTestCase(APITestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.staff_profile = Profile.objects.create(user=self.staff_user,
-                                                    college=self.institute,
-                                                    phone_number='+991234567899'
-                                                    )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.staff_profile = Profile.objects.get(user=self.staff_user)
+        self.staff_profile.college = self.institute
+        self.staff_profile.save()
+
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
                                             opened_by=self.profile,
@@ -309,19 +304,15 @@ class TicketCommentListCreateViewTestCase(APITestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
-        self.staff_profile = Profile.objects.create(user=self.staff_user,
-                                                    college=self.institute,
-                                                    phone_number='+991234567899'
-                                                    )
+        self.staff_profile = Profile.objects.get(user=self.staff_user)
+
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
                                             opened_by=self.profile
@@ -384,12 +375,6 @@ class TicketCommentListCreateViewTestCase(APITestCase):
         response = self.client.post(url, json.dumps({'text': 'ticket comment 1'}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_ticket_comment_create_view_profile_not_complete(self):
-        url = reverse('ticket_comment_create_list', args=(self.ticket.public_id,))
-        self.client.force_login(user=self.user2)
-        response = self.client.post(url, json.dumps({'text': 'ticket comment 1'}), content_type='application/json')
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
-
     def test_ticket_comment_create_view(self):
         url = reverse('ticket_comment_create_list', args=(self.ticket.public_id,))
         self.client.force_login(user=self.user1)
@@ -425,19 +410,15 @@ class TicketCommentDetailUpdateDeleteView(APITestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
-        self.staff_profile = Profile.objects.create(user=self.staff_user,
-                                                    college=self.institute,
-                                                    phone_number='+991234567899'
-                                                    )
+        self.staff_profile = Profile.objects.get(user=self.staff_user)
+
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
                                             opened_by=self.profile
@@ -579,14 +560,12 @@ class TicketSubscribeViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
@@ -609,12 +588,6 @@ class TicketSubscribeViewTestCase(APITestCase):
         self.client.force_login(user=self.user1)
         response = self.client.put(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_ticket_subscribe_view_profile_not_complete(self):
-        url = reverse('ticket_subscribe', args=(self.ticket.public_id,))
-        self.client.force_login(user=self.user2)
-        response = self.client.put(url)
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_ticket_subscribe_view_ticket_private(self):
         url = reverse('ticket_subscribe', args=(self.ticket1.public_id,))
@@ -656,18 +629,15 @@ class TicketUnsubscribeViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
-        self.profile2 = Profile.objects.create(user=self.user2,
-                                               college=self.institute,
-                                               phone_number='+991234567892'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
+        self.profile2 = Profile.objects.get(user=self.user2)
+        self.profile2.college = self.institute
+        self.profile2.save()
 
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
@@ -687,12 +657,6 @@ class TicketUnsubscribeViewTestCase(APITestCase):
         self.client.force_login(user=self.user1)
         response = self.client.put(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_ticket_unsubscribe_view_profile_not_complete(self):
-        url = reverse('ticket_unsubscribe', args=(self.ticket.public_id,))
-        self.client.force_login(user=self.user2)
-        response = self.client.put(url)
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_ticket_unsubscribe_view_not_subscribed(self):
         url = reverse('ticket_unsubscribe', args=(self.ticket.public_id,))

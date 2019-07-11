@@ -16,10 +16,9 @@ class TicketSerializerTestCase(TestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
 
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
@@ -93,15 +92,12 @@ class TicketCommentSerializerTestCase(TestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.ticket = Ticket.objects.create(title='Sample Ticket1',
                                             description='Some sample description',
