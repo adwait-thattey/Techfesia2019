@@ -23,7 +23,7 @@ before_script:
   - python manage.py migrate
 
 script:
-  - coverage run --source=tickets manage.py test tickets/tests -v 2
+  - coverage run --source=base,registration,events,accounts,event_registrations,tickets,blog,etc,management manage.py test
 
 after_success:
   - coveralls  
