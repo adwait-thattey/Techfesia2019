@@ -6,10 +6,12 @@ from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts import serializers
 from accounts.utils import account_activation_token, send_account_activation_email
 from registration.decorators import is_user_calling_self
 from registration.models import User
@@ -69,3 +71,29 @@ def activate(request, username, uidb64, token):
         return HttpResponse("Your email was successfully confirmed. You may go ahead and login now")
     else:
         return HttpResponse("Invalid token!")
+
+
+class ProfilePictureUpdateView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser, FormParser)
+
+    @method_decorator(is_user_calling_self)
+    def post(self, request, username):
+        user = get_object_or_404(User, username=username)
+
+        modified_data_dict = {
+            'uploaded_image': request.data.get('profile_picture'),
+            'user':user.pk
+        }
+
+        sr = serializers.ProfilePictureUploadSerializer(data=modified_data_dict)
+        if sr.is_valid():
+            img = sr.save()
+
+            user.profile.profile_pic = img.uploaded_image.url
+            user.profile.save()
+
+            return Response(data={"profile_pic":user.profile.profile_pic}, status=status.HTTP_201_CREATED)
+
+        return Response(sr.errors)
