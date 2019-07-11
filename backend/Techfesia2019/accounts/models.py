@@ -2,13 +2,14 @@ from django.core.validators import MinLengthValidator
 from django.db import models
 
 # Create your models here.
+from django.db.models import signals
+from django.dispatch import receiver
+
 from events.models import Event, SoloEvent
 from registration.models import User
 
-
 class Institute(models.Model):
     name = models.CharField(max_length=200, default='Indian Institute of Information Technology, Sri City')
-
 
 class Profile(models.Model):
     user = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name='profile')
@@ -33,3 +34,15 @@ class ProfileOrganizer(models.Model):
 class ProfileVolunteer(models.Model):
     profile = models.OneToOneField(to=Profile, on_delete=models.CASCADE)
     events = models.ManyToManyField(to=Event, related_name="volunteers")
+
+
+
+@receiver(signals.post_save, sender=User)
+def create_profile_for_user(sender, instance, created, **kwargs):
+    """
+        If user is superuser, then set email confirmed to true
+    """
+
+    if created:
+        profile =Profile(user=instance)
+        profile.save()
