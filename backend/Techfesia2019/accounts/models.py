@@ -8,11 +8,18 @@ from django.dispatch import receiver
 from events.models import Event, SoloEvent
 from registration.models import User
 
+class Institute(models.Model):
+    name = models.CharField(max_length=200, default='Indian Institute of Information Technology, Sri City')
+
 class Profile(models.Model):
-    user = models.OneToOneField(to=User, on_delete=models.CASCADE)
+    user = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name='profile')
     profile_pic = models.URLField()
-    phone_number = models.CharField(max_length=13, validators=[MinLengthValidator(13)], null=True, blank=True)
-    college_name = models.CharField(max_length=150, null=True, blank=True)
+    phone_number = models.CharField(max_length=13, validators=[MinLengthValidator(13)])
+    college = models.ForeignKey(to=Institute, on_delete=models.CASCADE, null=True, blank=True)
+
+    @property
+    def get_user_username(self):
+        return self.user.username
 
 
 class ProfileParticipant(models.Model):

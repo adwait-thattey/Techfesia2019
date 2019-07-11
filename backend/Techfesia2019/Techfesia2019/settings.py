@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'registration',
     'events',
     'accounts',
+    'tickets',
     'event_registrations',
     'blog',
     'etc',
@@ -125,7 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'registration.User'
 
-APPEND_SLASH = False
+APPEND_SLASH = True
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
