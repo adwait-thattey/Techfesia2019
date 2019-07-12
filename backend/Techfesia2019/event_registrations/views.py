@@ -154,7 +154,7 @@ class TeamInvitationAcceptView(APIView):
 class TeamInvitationRejectView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def put(self, request, username, team_public_id, format=None):
+    def delete(self, request, username, team_public_id, format=None):
         if not request.user.username == username:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
@@ -165,14 +165,8 @@ class TeamInvitationRejectView(APIView):
             invitation = TeamMember.objects.filter(profile=profile).get(team__public_id=team_public_id)
         except TeamMember.DoesNotExist:
             return Response({'error': 'Invitation not found'}, status=status.HTTP_404_NOT_FOUND)
-        if invitation.invitation_rejected:
-            return Response({'error': 'Already Rejected'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        else:
-            invitation.invitation_rejected = True
-            invitation.invitation_accepted = False
-            invitation.save()
-        serializer = TeamMemberSerializer(invitation)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        invitation.delete()
+        return Response({'message': 'invitation deleted'}, status=status.HTTP_200_OK)
 
 
 class TeamInvitationCreateView(APIView):

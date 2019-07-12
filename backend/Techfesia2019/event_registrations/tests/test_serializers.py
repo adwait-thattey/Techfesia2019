@@ -150,7 +150,7 @@ class TeamMemberSerializerTestCase(TestCase):
         self.assertEqual(self.test_data1['teamId'], self.serializer1['teamId'].value)
         self.assertEqual(self.test_data2['teamId'], self.serializer2['teamId'].value)
 
-    def test_team_status(self):
+    def test_team_member_status(self):
         self.assertEqual(self.test_data1['status'], self.serializer1['status'].value)
         self.assertEqual(self.test_data2['status'], self.serializer2['status'].value)
 

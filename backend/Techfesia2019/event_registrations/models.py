@@ -83,10 +83,6 @@ class TeamMember(models.Model):
                                               help_text="If true person has accepted invitation and is part of the team"
                                               )
 
-    invitation_rejected = models.BooleanField(default=False,
-                                              help_text="If true person has rejected invitation and can\'t accept it."
-                                              )
-
     joined_on = models.DateTimeField(auto_now=True)
 
     @property
@@ -105,17 +101,8 @@ class TeamMember(models.Model):
     def status(self):
         if self.invitation_accepted:
             return "accepted"
-        elif self.invitation_rejected:
-            return "rejected"
         else:
             return "pending"
-
-    def save(self, *args, **kwargs):
-        if self.invitation_accepted:
-            self.invitation_rejected = False
-        if self.invitation_rejected:
-            self.invitation_accepted = False
-        super().save(*args, **kwargs)
 
 
 class SoloEventRegistration(models.Model):

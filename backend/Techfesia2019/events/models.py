@@ -152,31 +152,17 @@ class TeamEvent(Event):
     def refresh_participants(self):
         total_seats = self.max_participants
         total_reserved_seats = self.reserved_slots
-        # If reserved registrations are available
-        while self.current_waiting_reserved_participants().count() is not 0:
-            # If reserved seats are available
-            if self.current_reserved_participants().count() < total_reserved_seats:
-                registration = self.current_waiting_reserved_participants().order_by('created_on')[0]
+
+        reserved_slot = total_reserved_seats - self.current_reserved_participants().count()
+        if reserved_slot > 0:
+            for registration in self.current_waiting_reserved_participants().order_by('created_on')[:reserved_slot]:
                 registration.is_confirmed = True
                 registration.save()
-            else:
-                break
-        # If All Reserved Slots are full
-        if self.current_reserved_participants().count() >= total_reserved_seats:
-            while self.current_waiting_participants().count() is not 0:
-                # Consider all registrations general
-                if self.current_participants().count() < total_seats:
-                    registration = self.current_waiting_participants().order_by('created_on')[0]
-                    registration.is_confirmed = True
-                    registration.save()
-                else:
-                    break
+
+        if self.current_reserved_participants().count() < total_reserved_seats:
+            reserved_slot = total_seats - total_reserved_seats - self.current_participants().filter(is_reserved=False)
         else:
-            while self.current_waiting_participants().count() is not 0:
-                # Leave seats for Reserved Candidates
-                if self.current_participants().filter(is_reserved=False).count() < total_seats - total_reserved_seats:
-                    registration = self.current_waiting_participants().order_by('created_on')[0]
-                    registration.is_confirmed = True
-                    registration.save()
-                else:
-                    break
+            reserved_slot = total_seats - self.current_participants().count()
+        for registration in self.current_waiting_participants().order_by('created_on')[:reserved_slot]:
+            registration.is_confirmed = True
+            registration.save()

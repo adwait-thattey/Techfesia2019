@@ -599,53 +599,34 @@ class TeamInvitationRejectViewTestCase(APITestCase):
     def test_team_invitation_reject_view_unauthenticated(self):
         url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
         self.client.login(user=None)
-        response = self.client.put(url)
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_team_invitation_reject_view_wrong_user(self):
         url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
         self.client.force_login(user=self.user)
-        response = self.client.put(url)
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_team_invitation_reject_view_wrong_username(self):
         url = reverse('reject_invitation', args=(self.user.username, self.team.public_id))
         self.client.force_login(user=self.user1)
-        response = self.client.put(url)
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_team_invitation_reject_view_does_not_exist(self):
         url = reverse('reject_invitation', args=(self.user1.username, 'random_string'))
         self.client.force_login(user=self.user1)
-        response = self.client.put(url)
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_team_invitation_reject_view_already_rejected(self):
-        self.assertEqual(self.team_member1.status, 'pending')
-        url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
-        self.client.force_login(user=self.user1)
-        response = self.client.put(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual('rejected', response.data['status'])
-        response = self.client.put(url)
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_team_invitation_reject_view(self):
         self.assertEqual(self.team_member1.status, 'pending')
-        test_data = {
-            'teamId': self.team.public_id,
-            'name': self.team.name,
-            'leader': self.user.username,
-            'status': 'rejected'
-        }
         url = reverse('reject_invitation', args=(self.user1.username, self.team.public_id))
         self.client.force_login(user=self.user1)
-        response = self.client.put(url)
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(test_data['teamId'], response.data['teamId'])
-        self.assertEqual(test_data['leader'], response.data['leader'])
-        self.assertEqual(test_data['name'], response.data['name'])
-        self.assertEqual(test_data['status'], response.data['status'])
+        self.assertFalse(TeamMember.objects.filter(team=self.team, profile=self.profile1).exists())
 
 
 class TeamInvitationCreateViewTestCase(APITestCase):

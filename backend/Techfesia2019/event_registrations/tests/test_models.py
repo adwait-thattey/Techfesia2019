@@ -108,14 +108,6 @@ class TeamMemberTestCase(TestCase):
         self.assertFalse(self.team.members.filter(profile=self.profile2).exists())
         self.assertTrue(self.team.invitees.filter(profile=self.profile2).exists())
 
-    def test_rejected_status(self):
-        self.team_member.invitation_rejected = True
-        self.team_member.invitation_accepted = False
-        self.team_member.save()
-        self.assertEqual(self.team_member.status, 'rejected')
-        self.assertFalse(self.team.members.filter(profile=self.profile2).exists())
-        self.assertTrue(self.team.invitees.filter(profile=self.profile2).exists())
-
     def test_accepted_status(self):
         self.team_member.invitation_accepted = True
         self.team_member.save()
@@ -263,3 +255,76 @@ class TeamEventRegistrationTestCase(TestCase):
         self.registration.is_confirmed = True
         self.registration.save()
         self.assertEqual(self.registration.status, 'confirmed')
+
+
+class EventRefreshParticipantsTestCase(TestCase):
+    def setUp(self):
+        self.institute = Institute.objects.create()
+        self.institute1 = Institute.objects.create(name='Other Institute')
+        self.event = SoloEvent.objects.create(title='Sample Solo Event1',
+                                              start_date=dt.date(2019, 8, 3),
+                                              start_time=dt.time(12, 0, 0),
+                                              end_date=dt.date(2019, 9, 4),
+                                              end_time=dt.time(10, 0, 0),
+                                              max_participants=15,
+                                              reserved_slots=5
+                                              )
+        self.event1 = SoloEvent.objects.create(title='Sample Solo Event2',
+                                               start_date=dt.date(2019, 8, 3),
+                                               start_time=dt.time(12, 0, 0),
+                                               end_date=dt.date(2019, 9, 4),
+                                               end_time=dt.time(10, 0, 0),
+                                               max_participants=18,
+                                               reserved_slots=12
+                                               )
+
+        self.users = []
+        self.profiles = []
+
+        for i in range(1, 11):
+            user = User.objects.create(username='sample_test_user' + str(i),
+                                       first_name='sample',
+                                       last_name='user' + str(i),
+                                       email='sample_user{0}@test.com'.format(str(i)),
+                                       email_confirmed=True
+                                       )
+            profile = Profile.objects.get(user=user)
+            profile.college = self.institute
+            profile.save()
+            self.users.append(user)
+            self.profiles.append(profile)
+
+            SoloEventRegistration.objects.create(event=self.event, profile=profile,
+                                                 is_complete=True, is_reserved=False
+                                                 )
+            SoloEventRegistration.objects.create(event=self.event1, profile=profile,
+                                                 is_complete=True, is_reserved=False
+                                                 )
+
+        for i in range(11, 21):
+            user = User.objects.create(username='sample_test_user' + str(i),
+                                       first_name='sample',
+                                       last_name='user' + str(i),
+                                       email='sample_user{0}@test.com'.format(str(i)),
+                                       email_confirmed=True
+                                       )
+            profile = Profile.objects.get(user=user)
+            profile.college = self.institute1
+            profile.save()
+            self.users.append(user)
+            self.profiles.append(profile)
+
+            SoloEventRegistration.objects.create(event=self.event, profile=profile,
+                                                 is_complete=True, is_reserved=True
+                                                 )
+            SoloEventRegistration.objects.create(event=self.event1, profile=profile,
+                                                 is_complete=True, is_reserved=True
+                                                 )
+
+    def test_refresh_participants(self):
+        self.event.refresh_participants()
+        self.event1.refresh_participants()
+        self.assertGreaterEqual(self.event.current_reserved_participants().count(), 5)
+        self.assertLessEqual(self.event.current_participants().filter(is_reserved=False).count(), 10)
+        self.assertLessEqual(self.event1.current_reserved_participants().count(), 12)
+        self.assertLessEqual(self.event1.current_participants().count(), 18)
