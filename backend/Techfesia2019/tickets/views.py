@@ -12,10 +12,12 @@ from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from django.dispatch import Signal, receiver
+from django.core.mail import send_mail
+from django.template.loader import get_template
 # Create your views here.
 
 
-notifications = Signal(providing_args = ['subject','message','ticket_id'])
+notifications = Signal(providing_args = ['subject','ticket_id'])
 
 class TicketCreateListView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -93,8 +95,6 @@ class TicketCloseView(APIView):
                 ticket.save()
                 notifications.send(
                     sender = Ticket,
-                    subject= `The ticket '{}' has been closed.`.format(ticket.title),
-                    message= "msg",
                     ticket_id = comment.ticket.public_id 
                     )
             except IntegrityError:
@@ -141,8 +141,6 @@ class TicketCommentListCreateView(APIView):
         comment.save()
         notifications.send(
             sender = TicketComment,
-            subject= `The ticket '{}' has got a new comment!`.format(comment.ticket.title),
-            message= "msg",
             ticket_id = comment.ticket.public_id 
             )
         serializer = TicketCommentSerializer(comment)

@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+   <head>
+      <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+      <title></title>
+      <style type="text/css">
+         <!--
+            .hmmessage P
+            {
+            margin:0px;
+            padding:0px
+            }
+            body.hmmessage
+            {
+            font-size: 10pt;
+            font-family:Verdana
+            }
+            #borderblack {
+            border-left-width: 1px;
+            border-left-style: solid;
+            border-left-color: #000000;
+            border-right-width: 1px;
+            border-right-style: solid;
+            border-right-color: #000000;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+            border-bottom-color: #000000;
+            }
+            .cHighPriority
+            {
+            color:red;
+            background-color:red;
+            }
+            .cMedPriority
+            {
+            color:#FF9A00;
+            background-color:#FF9A00;
+            }
+            .cLowPriority
+            {
+            color:green;
+            background-color:green;
+            }
+            
+            -->
+         a { color:#FF6600;}
+      </style>
+   </head>
+   <body class="hmmessage" style="background-color: rgb(239, 239, 239);">
+      <div style="background-color: rgb(239, 239, 239); font-size: 9pt; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; font-family: Arial,Verdana,sans-serif; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; color: rgb(91, 91, 91);">
+         <br>
+         <br>
+         <h2> TechFesia Ticket Notification </h2>
+         <table width="653" class="{{ priority_class }}" style="padding: 0pt 22px; color: rgb(91, 91, 91);">
+            <tbody>
+               <tr>
+                  <td></td>
+               </tr>
+            </tbody>
+         </table>
+         <table id="borderblack" style="padding: 0pt 22px; background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; color: rgb(91, 91, 91);" cellspacing="0" width="651">
+            <tbody>
+               <tr>
+                  <td style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; color: rgb(91, 91, 91);">
+                     <table border="0" cellpadding="0" cellspacing="0" width="605">
+                        <tbody>
+                           <tr valign="top">
+                              <td style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; padding-right: 30px; font-size: 13px; font-family: Arial,Verdana,sans-serif; color: rgb(91, 91, 91); line-height: 1.5;">
+                                 <br>
+                                 {% if message %}
+                                 <p style="font-weight: bold;">
+                                    {{message}}
+                                 </p>
+                                 {% endif %} {% if ticket.previous_comments != empty %}
+                                 <div style="padding: 5px;">
+                                    <table border="0" cellpadding="0" cellspacing="0">
+                                       <tbody>
+                                          <tr>
+                                             <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
+                                                {% if ticket.due_date == null %}{% else %}{% if 'now' > ticket_due_date | date: "%Y-%m-%d" %}
+                                                <span style=font-size:110%;font-style:bold;color:red;'>This ticket is currently overdue.</span><br><br>
+                                                {% endif %}{% endif %}<br>
+                                                <br><span style="font-size:120%;">Ticket History</span>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                                 <hr noshade="noshade" style="width:100%;color:#FF6600">
+                                 <br>
+                                 {%endif%}
+                                 <p style="FONT-FAMILY: Trebuchet MS; COLOR: rgb(51,162,51); FONT-SIZE: 13px">
+                                    <i>On {{ticket.last_comment.created_at | date_sw}}, {{ticket.last_comment.creator.full_name_or_email}} said:</i>
+                                 </p>
+                                 <br>
+                                 {{ticket.last_comment.body | escape | simple_format}}<br>
+                                 {% for comment in ticket.previous_comments %} {% if comment.creator.role == 'admin' %} {% assign border_color = '#FFC090' %} {% else %} {% assign border_color = '#E7E7E7' %} {% endif %} {% if comment.creator == ticket.creator %} {% assign border_color = '#B0D0FF' %} {% endif %}
+                                 <div style="padding:8px;border:1px solid {{ border_color }}; font-size:11px;">
+                                    <i style="font-weight:bold;font-size:11px;color:rgb(51,162,51);">On {{comment.created_at | date_sw}}, {{comment.creator.full_name_or_email | escape}} said:</i><br>
+                                    <br>
+                                    <span style="padding:8px;">{{comment.body | escape | simple_format}}</span>
+                                 </div>
+                                 <br>
+                                 {% endfor %}<br>
+                                 {% if recipient.is_admin %}
+                                 <div style="border: 1px solid rgb(204, 204, 204); padding: 8px; width: 410px; background-color: rgb(239, 239, 239); font-size: 11px;">
+                                    <h2 style="margin-bottom: 5px; margin-top: 0px; font-size: 11px;">
+                                       Ticket Overview
+                                    </h2>
+                                    Creator: {{ticket.creator.full_name_or_email | escape}}<br>
+                                    Assignee: {{ticket.assignee.full_name_or_email | escape}}<br>
+                                    Ticket URL: <a href="{{ticket.url | escape}}">{{ticket.url | escape}}</a><br>
+                                    App: <a href="{{app_url | escape}}">{{app_url | escape}}</a><br>
+                                    <br>
+                                    Don't forget you can use Tickets Anywhere<br>
+                                    <br>
+                                    Examples:<tt>#close, #add 5m, #assign to bob, #priority high</tt>
+                                 </div>
+                                 {% endif %}<br>
+                                 <br>
+                              </td>
+                              <td width="30%" style="font-family: Arial,Verdana,sans-serif; font-size: 12px;">
+                                 <br>
+                                 <div style="border: 1px solid rgb(204, 204, 204); padding: 5px;">
+                                    <table border="0" cellpadding="0" cellspacing="0">
+                                       <tbody>
+                                          <tr>
+                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
+                                                {%if recipient.is_admin %} Ticket ID: <a href="{{ticket.url | escape}}">{{ticket.id}}</a><br>
+                                                Priority: <span class="{{ priority_class }}" style="background-color:white">{{ticket.priority}}</span><br>
+                                                {% if ticket.due_date %} Ticket Due: {{ticket.due_date}}<br>
+                                                {% endif %} {% else %} Ticket ID: <a href="{{ticket.portal_url | escape}}">{{ticket.id}}</a><br>
+                                                {% endif %}
+                                             </td>
+                                          </tr>
+                                          <tr>
+                                             <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(51, 51, 51);">
+                                                To update this request simply reply to this email, make sure the Ticket ID (including brackets) appears in the subject line.<br>
+                                                <br>
+                                                Alternatively visit the <a href="{{ticket.portal_url | escape}}">User Portal</a><br>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                                 <br>
+                                 {% if recipient.is_admin %}
+                                 <div style="border: 1px solid rgb(204, 204, 204); padding: 5px;">
+                                    <table border="0" cellpadding="0" cellspacing="0">
+                                       <tbody>
+                                          <tr>
+                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
+                                                RESOURCES
+                                             </td>
+                                          </tr>
+                                          <tr>
+                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px;">
+                                                <a style="color: rgb(51, 51, 51); text-decoration: none;" href="http://www.spiceworks.com/">Spiceworks</a>
+                                             </td>
+                                          </tr>
+                                          <tr>
+                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px;">
+                                                <a style="color: rgb(51, 51, 51); text-decoration: none;" href="http://community.spiceworks.com/">Spiceworks Community</a>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                                 <br>
+                                 {% endif %}
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+         <br>
+         <br>
+      </div>
+   </body>
+</html>
