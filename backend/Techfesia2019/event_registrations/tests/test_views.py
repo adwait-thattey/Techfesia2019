@@ -31,14 +31,12 @@ class TeamDetailEditDeleteViewTestCase(APITestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.event = TeamEvent.objects.create(title='Sample Solo Event',
                                               start_date=dt.date(2019, 7, 1),
@@ -246,14 +244,12 @@ class TeamListCreateViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.event = TeamEvent.objects.create(title='Sample Solo Event',
                                               start_date=dt.date(2019, 7, 1),
@@ -297,12 +293,6 @@ class TeamListCreateViewTestCase(APITestCase):
         response = self.client.post(url, json.dumps({'name': 'Sample Team1'}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_team_create_view_profile_not_complete(self):
-        url = reverse('teams_list_create')
-        self.client.force_login(user=self.user2)
-        response = self.client.post(url, json.dumps({'name': 'Sample Team3'}), content_type='application/json')
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
-
     def test_team_create_view(self):
         url = reverse('teams_list_create')
         self.client.force_login(user=self.user)
@@ -327,12 +317,6 @@ class TeamListCreateViewTestCase(APITestCase):
         self.client.force_login(user=self.staff_user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_team_list_view_profile_not_complete(self):
-        url = reverse('teams_list_create')
-        self.client.force_login(user=self.user2)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 class TeamInvitationListViewTestCase(APITestCase):
@@ -361,14 +345,12 @@ class TeamInvitationListViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.event = TeamEvent.objects.create(title='Sample Solo Event',
                                               start_date=dt.date(2019, 7, 1),
@@ -406,12 +388,6 @@ class TeamInvitationListViewTestCase(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_team_invitation_list_view_profile_not_complete(self):
-        url = reverse('list_invitation', args=(self.user2.username,))
-        self.client.force_login(user=self.user2)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
-
     def test_team_invitation_list_view(self):
         url = reverse('list_invitation', args=(self.user.username,))
         self.client.force_login(user=self.user)
@@ -445,14 +421,12 @@ class TeamInvitationDetailViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.team = Team.objects.create(team_leader=self.profile,
                                         name='Sample Team1'
@@ -483,12 +457,6 @@ class TeamInvitationDetailViewTestCase(APITestCase):
         self.client.force_login(user=self.user1)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_team_invitation_detail_view_profile_not_complete(self):
-        url = reverse('invitation_detail', args=(self.user2.username, self.team.public_id))
-        self.client.force_login(user=self.user2)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_team_invitation_detail_view(self):
         test_data = {
@@ -528,14 +496,12 @@ class TeamInvitationAcceptViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.team = Team.objects.create(team_leader=self.profile,
                                         name='Sample Team1'
@@ -619,14 +585,12 @@ class TeamInvitationRejectViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.team = Team.objects.create(team_leader=self.profile,
                                         name='Sample Team1'
@@ -711,14 +675,12 @@ class TeamInvitationCreateViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.team = Team.objects.create(team_leader=self.profile,
                                         name='Sample Team1'
@@ -805,14 +767,12 @@ class TeamInvitationDeleteViewTestCase(APITestCase):
                                               )
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.team = Team.objects.create(team_leader=self.profile,
                                         name='Sample Team1'
@@ -830,12 +790,6 @@ class TeamInvitationDeleteViewTestCase(APITestCase):
         self.client.force_login(user=self.user1)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_team_invitation_delete_view_profile_not_complete(self):
-        url = reverse('delete_invitation', args=(self.team.public_id, self.user2.username,))
-        self.client.force_login(user=self.user)
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_team_invitation_delete_view_team_does_not_exist(self):
         url = reverse('delete_invitation', args=('random_string', self.user1.username,))
@@ -885,14 +839,12 @@ class TeamMemberDeleteViewTestCase(APITestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
 
         self.event = TeamEvent.objects.create(title='Sample Team Event',
                                               team_event=True,
@@ -983,18 +935,15 @@ class EventRegistrationDetailView(APITestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
-        self.profile2 = Profile.objects.create(user=self.user2,
-                                               college=self.institute,
-                                               phone_number='+991234567893'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
+        self.profile2 = Profile.objects.get(user=self.user2)
+        self.profile2.college = self.institute
+        self.profile2.save()
 
         self.event = TeamEvent.objects.create(title='Sample Solo Event',
                                               team_event=True,

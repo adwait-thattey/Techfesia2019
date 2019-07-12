@@ -18,10 +18,9 @@ class TeamTestCase(TestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
 
         self.team = Team.objects.create(team_leader=self.profile,
                                         name='Sample Team1'
@@ -42,10 +41,9 @@ class TeamTestCase(TestCase):
                                          last_name='user2',
                                          email='sampleuser2@test.com'
                                          )
-        self.profile2 = Profile.objects.create(user=self.user2,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile2 = Profile.objects.get(user=self.user2)
+        self.profile2.college = self.institute
+        self.profile2.save()
         self.institute2 = Institute.objects.create(name='Sample Institute 2')
         self.team_member = TeamMember.objects.create(team=self.team, profile=self.profile2)
 
@@ -82,15 +80,13 @@ class TeamMemberTestCase(TestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
 
-        self.profile2 = Profile.objects.create(user=self.user2,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
+        self.profile2 = Profile.objects.get(user=self.user2)
+        self.profile2.college = self.institute
+        self.profile2.save()
 
         self.team = Team.objects.create(team_leader=self.profile,
                                         name='Sample Team1'
@@ -150,10 +146,9 @@ class SoloEventRegistrationTestCase(TestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
 
         self.event = SoloEvent.objects.create(title='Sample Solo Event',
                                               start_date=dt.date(2019, 7, 1),
@@ -214,20 +209,15 @@ class TeamEventRegistrationTestCase(TestCase):
 
         self.institute = Institute.objects.create()
 
-        self.profile = Profile.objects.create(user=self.user,
-                                              college=self.institute,
-                                              phone_number='+991234567890'
-                                              )
-
-        self.profile1 = Profile.objects.create(user=self.user1,
-                                               college=self.institute,
-                                               phone_number='+991234567891'
-                                               )
-
-        self.profile2 = Profile.objects.create(user=self.user2,
-                                               college=self.institute,
-                                               phone_number='+991234567892'
-                                               )
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
+        self.profile2 = Profile.objects.get(user=self.user2)
+        self.profile2.college = self.institute
+        self.profile2.save()
 
         self.event = TeamEvent.objects.create(title='Sample Solo Event',
                                               start_date=dt.date(2019, 7, 1),
