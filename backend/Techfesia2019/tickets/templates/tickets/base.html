@@ -78,9 +78,9 @@
                                        <tbody>
                                           <tr>
                                              <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
-                                                {% if ticket.due_date == null %}{% else %}{% if 'now' > ticket_due_date | date: "%Y-%m-%d" %}
-                                                <span style=font-size:110%;font-style:bold;color:red;'>This ticket is currently overdue.</span><br><br>
-                                                {% endif %}{% endif %}<br>
+                                                <span style=font-size:110%;font-style:bold;color:red;'>
+                                                	{{ message }}
+                                                </span><br><br>
                                                 <br><span style="font-size:120%;">Ticket History</span>
                                              </td>
                                           </tr>
@@ -95,7 +95,7 @@
                                  </p>
                                  <br>
                                  {{ticket.last_comment.body | escape | simple_format}}<br>
-                                 {% for comment in ticket.previous_comments %} {% if comment.creator.role == 'admin' %} {% assign border_color = '#FFC090' %} {% else %} {% assign border_color = '#E7E7E7' %} {% endif %} {% if comment.creator == ticket.creator %} {% assign border_color = '#B0D0FF' %} {% endif %}
+                                 {% for comment in ticket.previous_comments %} {% assign border_color = '#E7E7E7' %}{% if comment.creator == ticket.creator %} {% assign border_color = '#B0D0FF' %} {% endif %}
                                  <div style="padding:8px;border:1px solid {{ border_color }}; font-size:11px;">
                                     <i style="font-weight:bold;font-size:11px;color:rgb(51,162,51);">On {{comment.created_at | date_sw}}, {{comment.creator.full_name_or_email | escape}} said:</i><br>
                                     <br>
@@ -103,21 +103,16 @@
                                  </div>
                                  <br>
                                  {% endfor %}<br>
-                                 {% if recipient.is_admin %}
                                  <div style="border: 1px solid rgb(204, 204, 204); padding: 8px; width: 410px; background-color: rgb(239, 239, 239); font-size: 11px;">
                                     <h2 style="margin-bottom: 5px; margin-top: 0px; font-size: 11px;">
                                        Ticket Overview
                                     </h2>
-                                    Creator: {{ticket.creator.full_name_or_email | escape}}<br>
+                                    Creator: {{ticket.opened_by.full_name_or_email | escape}}<br>
                                     Assignee: {{ticket.assignee.full_name_or_email | escape}}<br>
                                     Ticket URL: <a href="{{ticket.url | escape}}">{{ticket.url | escape}}</a><br>
-                                    App: <a href="{{app_url | escape}}">{{app_url | escape}}</a><br>
                                     <br>
-                                    Don't forget you can use Tickets Anywhere<br>
-                                    <br>
-                                    Examples:<tt>#close, #add 5m, #assign to bob, #priority high</tt>
                                  </div>
-                                 {% endif %}<br>
+                                 <br>
                                  <br>
                               </td>
                               <td width="30%" style="font-family: Arial,Verdana,sans-serif; font-size: 12px;">
