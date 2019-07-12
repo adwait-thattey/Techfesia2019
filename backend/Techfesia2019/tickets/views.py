@@ -239,7 +239,8 @@ def send_emails(sender, **kwargs):
         ticket = Ticket.objects.filter(public_id = ticket_id)
         context = {
             'ticket' : ticket,
-            'message': `Ticket has been closed by {}`.format(ticket.solved_by.username)
+            'message': `Ticket has been closed by {}`.format(ticket.solved_by.username),
+            'last_comment': null
         }
         subject = `Ticket no.{} is solved`.format(ticket_id)
 
@@ -248,7 +249,8 @@ def send_emails(sender, **kwargs):
         comment = TicketComment.objects.filter(public_id = comment_id)
         context = {
             'ticket' : comment.ticket,
-            'message': `A new comment has been posted by {}`.format(comment.commenter.username)
+            'message': `A new comment has been posted by {}`.format(comment.commenter.username),
+            'last_comment': comment
         }
     
     message = get_template('base.html').render(context)
