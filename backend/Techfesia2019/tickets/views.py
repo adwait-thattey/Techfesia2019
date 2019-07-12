@@ -11,9 +11,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 from rest_framework import status
-
+from django.dispatch import Signal, receiver
 # Create your views here.
 
+
+notifications = Signal(providing_args = ['subject','message','ticket_id'])
 
 class TicketCreateListView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -89,6 +91,12 @@ class TicketCloseView(APIView):
             ticket.content = dict(request.data).get('content')
             try:
                 ticket.save()
+                notifications.send(
+                    sender = Ticket,
+                    subject= `The ticket '{}' has been closed.`.format(ticket.title),
+                    message= "msg",
+                    ticket_id = comment.ticket.public_id 
+                    )
             except IntegrityError:
                 return Response({'error': 'required field "content" not provided'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = TicketSerializer(ticket)
@@ -131,6 +139,12 @@ class TicketCommentListCreateView(APIView):
         except KeyError:
             return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
         comment.save()
+        notifications.send(
+            sender = TicketComment,
+            subject= `The ticket '{}' has got a new comment!`.format(comment.ticket.title),
+            message= "msg",
+            ticket_id = comment.ticket.public_id 
+            )
         serializer = TicketCommentSerializer(comment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -219,3 +233,7 @@ class TicketUnsubscribeView(APIView):
         ticket.subscribers.remove(profile)
         ticket.save()
         return Response({'message': 'unsubscribed from ticket'}, status=status.HTTP_200_OK)
+
+@receiver(notifications)
+def send_emails(sender, **kwargs):
+    
