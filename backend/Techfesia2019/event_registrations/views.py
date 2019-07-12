@@ -371,13 +371,17 @@ class EventRegistrationView(APIView):
                 event = base_event.teamevent
             except TeamEvent.DoesNotExist:
                 return Response({'error': 'The event doesn\'t exist'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            try:
-                registration = TeamEventRegistration.objects.get(event=event, team__team_leader__user=request.user)
-            except TeamEventRegistration.DoesNotExist:
+            registration = event.find_registration(request.user)
+            if registration is not None:
+                if registration.team.leader == request.user:
+                    registration.delete()
+                    event.refresh_participants()  # Refreshing registrations
+                else:
+                    return Response({'error': 'You are not the leader'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                return Response({'message': 'Successfully unregistered from event'}, status=status.HTTP_200_OK)
+            else:
                 return Response({'error': 'Not Registered for Event'}, status=status.HTTP_204_NO_CONTENT)
-            registration.delete()
-            event.refresh_participants()  # Refreshing registrations
-            return Response({'message': 'Successfully unregistered from event'}, status=status.HTTP_200_OK)
+
         else:
             try:
                 event = base_event.soloevent
@@ -385,7 +389,7 @@ class EventRegistrationView(APIView):
                 return Response({'error': 'The event doesn\'t exist'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             try:
                 registration = SoloEventRegistration.objects.get(event=event, profile=request.user.profile)
-            except SoloEvent.DoesNotExist:
+            except SoloEventRegistration.DoesNotExist:
                 return Response({'error': 'Not Registered for Event'}, status=status.HTTP_204_NO_CONTENT)
             registration.delete()
             event.refresh_participants()  # Refreshing registrations

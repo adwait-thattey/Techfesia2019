@@ -1170,11 +1170,15 @@ class EventRegistrationViewTestCase(APITestCase):
         self.team1 = Team.objects.create(team_leader=self.profile3,
                                          name='Sample Team2'
                                          )
+        self.team2 = Team.objects.create(team_leader=self.profile2,
+                                         name='Sample Team3'
+                                         )
 
         self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile2,
                                                       invitation_accepted=True)
         self.team1_member1 = TeamMember.objects.create(team=self.team1, profile=self.profile1,
                                                        invitation_accepted=True)
+        self.team2_member1 = TeamMember.objects.create(team=self.team2, profile=self.profile3)
 
         self.registration = TeamEventRegistration.objects.create(team=self.team, event=self.event,
                                                                  is_reserved=self.team.is_reserved,
@@ -1184,7 +1188,8 @@ class EventRegistrationViewTestCase(APITestCase):
 
         self.registration1 = SoloEventRegistration.objects.create(profile=self.profile, event=self.event1,
                                                                   is_reserved=self.profile.college == self.institute,
-                                                                  is_complete=True
+                                                                  is_complete=True,
+                                                                  is_confirmed=True
                                                                   )
         self.registration2 = SoloEventRegistration.objects.create(profile=self.profile3, event=self.event1,
                                                                   is_reserved=self.profile3.college == self.institute,
@@ -1232,6 +1237,12 @@ class EventRegistrationViewTestCase(APITestCase):
         self.assertTrue(SoloEventRegistration.objects.filter(event=self.event1, profile=self.profile2).exists())
         self.assertFalse(SoloEventRegistration.objects.get(event=self.event1, profile=self.profile2).is_reserved)
 
+    def test_team_event_register_view_incomplete_team(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user3)
+        response = self.client.post(url, json.dumps({'team': self.team2.public_id}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
     def test_team_event_register_view(self):
         url = reverse('create_event_registration', args=(self.event.public_id,))
         self.client.force_login(user=self.user3)
@@ -1239,3 +1250,40 @@ class EventRegistrationViewTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(TeamEventRegistration.objects.filter(event=self.event, team=self.team1).exists())
         self.assertFalse(TeamEventRegistration.objects.get(event=self.event, team=self.team1).is_reserved)
+
+    def test_event_unregister_view_unauthenticated(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.login(user=None)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_solo_event_unregister_view_not_registered(self):
+        url = reverse('create_event_registration', args=(self.event1.public_id,))
+        self.client.force_login(user=self.user2)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_solo_event_unregister_view(self):
+        url = reverse('create_event_registration', args=(self.event1.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_team_event_unregister_view_not_registered(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user1)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_team_event_unregister_view_not_leader(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user2)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_event_unregister_view(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
