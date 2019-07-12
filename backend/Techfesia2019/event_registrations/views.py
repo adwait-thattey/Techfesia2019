@@ -290,7 +290,6 @@ class EventRegistrationView(APIView):
             data = JSONParser().parse(request)
             try:
                 team = Team.objects.get(public_id=data['team'])
-                print(team.leader, request.user)
                 if team.leader != request.user:
                     return Response({'error': 'Only Team Leader can register a Team for an event'},
                                     status=status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -299,7 +298,7 @@ class EventRegistrationView(APIView):
                 return Response({'error': '{0} is a required field.'.format(key)}, status=status.HTTP_400_BAD_REQUEST)
 
             except Team.DoesNotExist:
-                return Response({'error': 'Team does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Team does not exit'}, status=status.HTTP_404_NOT_FOUND)
 
             if event.min_team_size <= team.member_count <= event.max_team_size:
                 pass
@@ -313,7 +312,7 @@ class EventRegistrationView(APIView):
             team_members = [team.team_leader.user, ] + [i.profile.user for i in team.teammember_set.all()]
             for i in team_members:
                 if event.find_registration(user=i) is not None:
-                    serializer = TeamEventRegistrationSerializer(event.find_registration(user=i), many=True)
+                    serializer = TeamEventRegistrationSerializer(event.find_registration(user=i))
                     return Response({'error': 'Already registered for event', 'registration_details': serializer.data},
                                     status=status.HTTP_422_UNPROCESSABLE_ENTITY
                                     )
@@ -352,7 +351,11 @@ class EventRegistrationView(APIView):
             registration = SoloEventRegistration()
             registration.profile = profile
             registration.event = event
-            registration.is_reserved = (profile.college.name == 'Indian Institute of Information Technology, Sri City')
+            try:
+                registration.is_reserved = \
+                    (profile.college.name == 'Indian Institute of Information Technology, Sri City')
+            except AttributeError:
+                registration.is_reserved = False
             registration.save()
             event.refresh_participants()  # Refreshing registrations
             serializer = SoloEventRegistrationSerializer(registration)
@@ -396,7 +399,7 @@ class EventRegistrationListView(APIView):
         try:
             base_event = Event.objects.get(public_id=public_id)
         except Event.DoesNotExist:
-            return Response({'error': 'Event does not exit'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Event does not exit'}, status=status.HTTP_404_NOT_FOUND)
         if base_event.team_event:
             try:
                 event = base_event.teamevent

@@ -3,9 +3,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from registration.models import User
 from accounts.models import Institute, Profile
-from events.models import TeamEvent
-from event_registrations.models import Team, TeamMember, TeamEventRegistration
-# from event_registrations.views import TeamListCreateView, TeamDetailEditDeleteView
+from events.models import TeamEvent, SoloEvent
+from event_registrations.models import Team, TeamMember, TeamEventRegistration, SoloEventRegistration
 import json
 import datetime as dt
 
@@ -909,7 +908,7 @@ class TeamMemberDeleteViewTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class EventRegistrationDetailView(APITestCase):
+class EventRegistrationDetailViewTestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create(username='sample_test_user1',
                                         first_name='sample',
@@ -996,4 +995,247 @@ class EventRegistrationDetailView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+class EventRegistrationListViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser2@test.com'
+                                         )
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user3',
+                                         email='sampleuser3@test.com'
+                                         )
+        self.user3 = User.objects.create(username='sample_test_user4',
+                                         first_name='sample',
+                                         last_name='user4',
+                                         email='sampleuser4@test.com'
+                                         )
 
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+
+        self.institute = Institute.objects.create()
+
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
+        self.profile2 = Profile.objects.get(user=self.user2)
+        self.profile2.save()
+        self.profile3 = Profile.objects.get(user=self.user3)
+        self.profile3.save()
+
+        self.event = TeamEvent.objects.create(title='Sample Solo Event',
+                                              team_event=True,
+                                              start_date=dt.date(2019, 7, 1),
+                                              end_date=dt.date(2019, 7, 1),
+                                              start_time=dt.time(12, 0, 0),
+                                              end_time=dt.time(15, 0, 0),
+                                              max_team_size=3,
+                                              min_team_size=1
+                                              )
+
+        self.team = Team.objects.create(team_leader=self.profile3,
+                                        name='Sample Team1'
+                                        )
+        self.team1 = Team.objects.create(team_leader=self.profile,
+                                         name='Sample Team2'
+                                         )
+
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile2,
+                                                      invitation_accepted=True)
+        self.team1_member1 = TeamMember.objects.create(team=self.team1, profile=self.profile1,
+                                                       invitation_accepted=True)
+
+        self.registration = TeamEventRegistration.objects.create(team=self.team, event=self.event,
+                                                                 is_reserved=self.team.is_reserved,
+                                                                 is_complete=True,
+                                                                 is_confirmed=True
+                                                                 )
+
+        self.registration1 = TeamEventRegistration.objects.create(team=self.team1, event=self.event,
+                                                                  is_reserved=self.team.is_reserved,
+                                                                  is_complete=True,
+                                                                  is_confirmed=True
+                                                                  )
+
+    def test_event_registration_list_view_unauthenticated(self):
+        url = reverse('list_event_registration', args=(self.event.public_id,))
+        self.client.login(user=None)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_event_registration_list_view_event_does_not_exist(self):
+        url = reverse('list_event_registration', args=('random_string',))
+        self.client.force_login(user=self.staff_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_event_registration_list_view_standard_user(self):
+        url = reverse('list_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_event_registration_list_view_staff_user(self):
+        url = reverse('list_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.staff_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class EventRegistrationViewTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='sample_test_user1',
+                                        first_name='sample',
+                                        last_name='user',
+                                        email='sampleuser1@test.com'
+                                        )
+        self.user1 = User.objects.create(username='sample_test_user2',
+                                         first_name='sample',
+                                         last_name='user1',
+                                         email='sampleuser2@test.com'
+                                         )
+        self.user2 = User.objects.create(username='sample_test_user3',
+                                         first_name='sample',
+                                         last_name='user2',
+                                         email='sampleuser3@test.com'
+                                         )
+        self.user3 = User.objects.create(username='sample_test_user4',
+                                         first_name='sample',
+                                         last_name='user3',
+                                         email='sampleuser4@test.com'
+                                         )
+        self.user4 = User.objects.create(username='sample_test_user5',
+                                         first_name='sample',
+                                         last_name='user4',
+                                         email='sampleuser5@test.com'
+                                         )
+
+        self.staff_user = User.objects.create(username='staff',
+                                              first_name='staff',
+                                              last_name='user',
+                                              email='staff@test.com',
+                                              is_staff=True
+                                              )
+
+        self.institute = Institute.objects.create()
+        self.institute1 = Institute.objects.create(name='Other Institute')
+
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.college = self.institute
+        self.profile.save()
+        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1.college = self.institute
+        self.profile1.save()
+        self.profile2 = Profile.objects.get(user=self.user2)
+        self.profile2.college = self.institute1
+        self.profile2.save()
+        self.profile3 = Profile.objects.get(user=self.user3)
+        self.profile3.college = self.institute1
+        self.profile3.save()
+
+        self.event = TeamEvent.objects.create(title='Sample Team Event',
+                                              team_event=True,
+                                              start_date=dt.date(2019, 7, 1),
+                                              end_date=dt.date(2019, 7, 1),
+                                              start_time=dt.time(12, 0, 0),
+                                              end_time=dt.time(15, 0, 0),
+                                              max_team_size=3,
+                                              min_team_size=1
+                                              )
+        self.event1 = SoloEvent.objects.create(title='Sample Solo Event',
+                                               start_date=dt.date(2019, 8, 3),
+                                               end_date=dt.date(2019, 8, 4),
+                                               start_time=dt.time(11, 0, 0),
+                                               end_time=dt.time(15, 0, 0),
+                                               )
+
+        self.team = Team.objects.create(team_leader=self.profile,
+                                        name='Sample Team1'
+                                        )
+        self.team1 = Team.objects.create(team_leader=self.profile3,
+                                         name='Sample Team2'
+                                         )
+
+        self.team_member1 = TeamMember.objects.create(team=self.team, profile=self.profile2,
+                                                      invitation_accepted=True)
+        self.team1_member1 = TeamMember.objects.create(team=self.team1, profile=self.profile1,
+                                                       invitation_accepted=True)
+
+        self.registration = TeamEventRegistration.objects.create(team=self.team, event=self.event,
+                                                                 is_reserved=self.team.is_reserved,
+                                                                 is_complete=True,
+                                                                 is_confirmed=True
+                                                                 )
+
+        self.registration1 = SoloEventRegistration.objects.create(profile=self.profile, event=self.event1,
+                                                                  is_reserved=self.profile.college == self.institute,
+                                                                  is_complete=True
+                                                                  )
+        self.registration2 = SoloEventRegistration.objects.create(profile=self.profile3, event=self.event1,
+                                                                  is_reserved=self.profile3.college == self.institute,
+                                                                  is_complete=True
+                                                                  )
+
+    def test_event_register_view_unauthenticated(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.login(user=None)
+        response = self.client.post(url, json.dumps({}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_solo_event_register_view_already_registered(self):
+        url = reverse('create_event_registration', args=(self.event1.public_id,))
+        self.client.force_login(user=self.user3)
+        response = self.client.post(url, json.dumps({}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_event_register_view_already_registered(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user)
+        response = self.client.post(url, json.dumps({'team': self.team.public_id}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+        self.client.force_login(user=self.user2)
+        response = self.client.post(url, json.dumps({'team': self.team1.public_id}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_event_register_view_not_team_leader(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user2)
+        response = self.client.post(url, json.dumps({'team': self.team1.public_id}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    def test_team_event_register_view_team_does_not_exist(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user1)
+        response = self.client.post(url, json.dumps({'team': 'random_string'}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_solo_event_register_view(self):
+        url = reverse('create_event_registration', args=(self.event1.public_id,))
+        self.client.force_login(user=self.user2)
+        response = self.client.post(url, json.dumps({}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(SoloEventRegistration.objects.filter(event=self.event1, profile=self.profile2).exists())
+        self.assertFalse(SoloEventRegistration.objects.get(event=self.event1, profile=self.profile2).is_reserved)
+
+    def test_team_event_register_view(self):
+        url = reverse('create_event_registration', args=(self.event.public_id,))
+        self.client.force_login(user=self.user3)
+        response = self.client.post(url, json.dumps({'team': self.team1.public_id}), content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(TeamEventRegistration.objects.filter(event=self.event, team=self.team1).exists())
+        self.assertFalse(TeamEventRegistration.objects.get(event=self.event, team=self.team1).is_reserved)
