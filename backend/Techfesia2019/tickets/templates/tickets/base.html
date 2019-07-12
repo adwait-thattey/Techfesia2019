@@ -52,7 +52,7 @@
          <br>
          <br>
          <h2> TechFesia Ticket Notification </h2>
-         <table width="653" class="{{ priority_class }}" style="padding: 0pt 22px; color: rgb(91, 91, 91);">
+         <table width="653" style="padding: 0pt 22px; color: rgb(91, 91, 91);">
             <tbody>
                <tr>
                   <td></td>
@@ -127,48 +127,18 @@
                                        <tbody>
                                           <tr>
                                              <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
-                                                {%if recipient.is_admin %} Ticket ID: <a href="{{ticket.url | escape}}">{{ticket.id}}</a><br>
-                                                Priority: <span class="{{ priority_class }}" style="background-color:white">{{ticket.priority}}</span><br>
-                                                {% if ticket.due_date %} Ticket Due: {{ticket.due_date}}<br>
-                                                {% endif %} {% else %} Ticket ID: <a href="{{ticket.portal_url | escape}}">{{ticket.id}}</a><br>
-                                                {% endif %}
+													 Ticket ID: <a href="{{ }}">{{ticket.public_id}}</a><br>
                                              </td>
                                           </tr>
                                           <tr>
                                              <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(51, 51, 51);">
-                                                To update this request simply reply to this email, make sure the Ticket ID (including brackets) appears in the subject line.<br>
-                                                <br>
-                                                Alternatively visit the <a href="{{ticket.portal_url | escape}}">User Portal</a><br>
+                                                 Visit the <a href="{{ }}">Ticket Portal</a><br>
                                              </td>
                                           </tr>
                                        </tbody>
                                     </table>
                                  </div>
                                  <br>
-                                 {% if recipient.is_admin %}
-                                 <div style="border: 1px solid rgb(204, 204, 204); padding: 5px;">
-                                    <table border="0" cellpadding="0" cellspacing="0">
-                                       <tbody>
-                                          <tr>
-                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
-                                                RESOURCES
-                                             </td>
-                                          </tr>
-                                          <tr>
-                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px;">
-                                                <a style="color: rgb(51, 51, 51); text-decoration: none;" href="http://www.spiceworks.com/">Spiceworks</a>
-                                             </td>
-                                          </tr>
-                                          <tr>
-                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px;">
-                                                <a style="color: rgb(51, 51, 51); text-decoration: none;" href="http://community.spiceworks.com/">Spiceworks Community</a>
-                                             </td>
-                                          </tr>
-                                       </tbody>
-                                    </table>
-                                 </div>
-                                 <br>
-                                 {% endif %}
                               </td>
                            </tr>
                         </tbody>

@@ -17,7 +17,7 @@ from django.template.loader import get_template
 # Create your views here.
 
 
-notifications = Signal(providing_args = ['subject','ticket_id'])
+notifications = Signal(providing_args = ['subject','id'])
 
 class TicketCreateListView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -95,7 +95,7 @@ class TicketCloseView(APIView):
                 ticket.save()
                 notifications.send(
                     sender = Ticket,
-                    ticket_id = comment.ticket.public_id 
+                    ticket_id = ticket.public_id 
                     )
             except IntegrityError:
                 return Response({'error': 'required field "content" not provided'}, status=status.HTTP_400_BAD_REQUEST)
@@ -141,7 +141,7 @@ class TicketCommentListCreateView(APIView):
         comment.save()
         notifications.send(
             sender = TicketComment,
-            ticket_id = comment.ticket.public_id 
+            id = comment.public_id,
             )
         serializer = TicketCommentSerializer(comment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -234,4 +234,23 @@ class TicketUnsubscribeView(APIView):
 
 @receiver(notifications)
 def send_emails(sender, **kwargs):
+    if(sender == Ticket):
+        ticket_id = kwargs['id']
+        ticket = Ticket.objects.filter(public_id = ticket_id)
+        context = {
+            'ticket' : ticket,
+            'message': `Ticket has been closed by {}`.format(ticket.solved_by.username)
+        }
+        subject = `Ticket no.{} is solved`.format(ticket_id)
+
+    else:
+        comment_id = kwargs['id']
+        comment = TicketComment.objects.filter(public_id = comment_id)
+        context = {
+            'ticket' : comment.ticket,
+            'message': `A new comment has been posted by {}`.format(comment.commenter.username)
+        }
+    
+    message = get_template('base.html').render(context)
+    send_mail(subject, message,from_email,to_email,fail_silently = false)
     
