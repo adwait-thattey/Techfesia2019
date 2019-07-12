@@ -243,17 +243,28 @@ class TeamMemberDeleteView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def delete(self, request, public_id, username, format=None):
-        profile = Profile.objects.get(user__username=username)
-        team = Team.objects.get(public_id=public_id)
+        try:
+            user = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user)
+        except User.DoesNotExist:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        except Profile.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            team = Team.objects.get(public_id=public_id)
+        except Team.DoesNotExist:
+            return Response({'error': 'Team does not exist'}, status=status.HTTP_404_NOT_FOUND)
         if team.events.count() is not 0:
-            return Response({'error': 'Can\'t remove member from a registered team'})
+            return Response({'error': 'Can\'t remove member from a registered team'},
+                            status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                            )
         try:
             team_member = TeamMember.objects.get(team=team, profile=profile, invitation_accepted=True)
         except TeamMember.DoesNotExist:
             return Response({'error': 'Doesn\'t Exist or Not accepted Invitation'}, status=status.HTTP_204_NO_CONTENT)
         if team.leader == request.user:
             team_member.delete()
-            return Response({'message': 'Member Deleted'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'message': 'Member Deleted'}, status=status.HTTP_200_OK)
         return Response({'error': 'You do not have the permission to do this'}, status=status.HTTP_403_FORBIDDEN)
 
 
