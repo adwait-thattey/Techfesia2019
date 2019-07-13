@@ -283,7 +283,7 @@ class EventRegistrationView(APIView):
             # 2. Get Team Details (verify team size, leader)
             data = JSONParser().parse(request)
             try:
-                team = Team.objects.get(public_id=data['team'])
+                team = Team.objects.get(public_id=data['teamId'])
                 if team.leader != request.user:
                     return Response({'error': 'Only Team Leader can register a Team for an event'},
                                     status=status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -297,7 +297,7 @@ class EventRegistrationView(APIView):
             if event.min_team_size <= team.member_count <= event.max_team_size:
                 pass
             else:
-                return Response({'error': 'Team size is not '}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                return Response({'error': 'Team size is not correct'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
             if not team.ready():
                 return Response({'error': 'Team has pending invitations'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)

@@ -17,7 +17,7 @@ class Echo:
         return value
 
 
-@login_required(login_url='staff_login', redirect_field_name='next')
+@login_required(login_url='staff_login_csv', redirect_field_name='next')
 @permission_classes([IsStaffUser, ])  # todo: Add Permission to make sure a staff user is accessing the data
 def get_event_registrations(request, public_id):
     base_event = Event.objects.get(public_id=public_id)
