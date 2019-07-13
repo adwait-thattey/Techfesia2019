@@ -241,6 +241,7 @@ def send_emails(sender, **kwargs):
             'ticket' : ticket,
             'message': `Ticket has been closed by {}`.format(ticket.solved_by.username),
             'last_comment': null
+            'url': `localhost:8000/ticket/{}/detail`.format(ticket_id)
         }
         subject = `Ticket no.{} is solved`.format(ticket_id)
 
@@ -251,8 +252,11 @@ def send_emails(sender, **kwargs):
             'ticket' : comment.ticket,
             'message': `A new comment has been posted by {}`.format(comment.commenter.username),
             'last_comment': comment
+            'url': `localhost:8000/ticket/{}/detail`.format(comment.ticket.public_id)
         }
+        subject = `Ticket no.{} has a new comment`.format(comment.ticket.public_id)
     
     message = get_template('base.html').render(context)
+    
     send_mail(subject, message,from_email,to_email,fail_silently = false)
     

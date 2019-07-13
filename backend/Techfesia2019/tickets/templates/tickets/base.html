@@ -79,7 +79,7 @@
                                        <tbody>
                                           <tr>
                                              <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
-                                                <span style=font-size:110%;font-style:bold;color:red;'>
+                                                <span style=font-size:110%;font-style:bold;color:red;>
                                                 	Ticket Status: {{ ticket.status }}
                                                 </span><br><br>
                                                 <br><span style="font-size:120%;">Ticket History</span>
@@ -113,7 +113,7 @@
                                     Creator: {{ticket.opened_by.username | escape}}<br>
                                     Event: {{ticket.event.title | escape}}<br>
                                     Status: {{ ticket.status | escape}} <br>
-                                    Ticket URL: <a href="{{ticket.url | escape}}">{{ticket.url | escape}}</a><br>
+                                    Ticket URL: <a href="{{url | escape}}">{{url | escape}}</a><br>
                                     <br>
                                  </div>
                                  <br>
@@ -134,7 +134,7 @@
                                           </tr>
                                           <tr>
                                              <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(51, 51, 51);">
-                                                 Visit the <a href="{{ }}">Ticket Portal</a><br>
+                                                 Visit the <a href='tickets_list_public'>Ticket Portal</a><br>
                                              </td>
                                           </tr>
                                        </tbody>
