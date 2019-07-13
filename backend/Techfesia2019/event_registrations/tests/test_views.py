@@ -1192,22 +1192,22 @@ class EventRegistrationViewTestCase(APITestCase):
     def test_team_event_register_view_already_registered(self):
         url = reverse('create_event_registration', args=(self.event.public_id,))
         self.client.force_login(user=self.user)
-        response = self.client.post(url, json.dumps({'team': self.team.public_id}), content_type='application/json')
+        response = self.client.post(url, json.dumps({'teamId': self.team.public_id}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
         self.client.force_login(user=self.user2)
-        response = self.client.post(url, json.dumps({'team': self.team1.public_id}), content_type='application/json')
+        response = self.client.post(url, json.dumps({'teamId': self.team1.public_id}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_team_event_register_view_not_team_leader(self):
         url = reverse('create_event_registration', args=(self.event.public_id,))
         self.client.force_login(user=self.user2)
-        response = self.client.post(url, json.dumps({'team': self.team1.public_id}), content_type='application/json')
+        response = self.client.post(url, json.dumps({'teamId': self.team1.public_id}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_team_event_register_view_team_does_not_exist(self):
         url = reverse('create_event_registration', args=(self.event.public_id,))
         self.client.force_login(user=self.user1)
-        response = self.client.post(url, json.dumps({'team': 'random_string'}), content_type='application/json')
+        response = self.client.post(url, json.dumps({'teamId': 'random_string'}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_solo_event_register_view(self):
@@ -1221,13 +1221,13 @@ class EventRegistrationViewTestCase(APITestCase):
     def test_team_event_register_view_incomplete_team(self):
         url = reverse('create_event_registration', args=(self.event.public_id,))
         self.client.force_login(user=self.user3)
-        response = self.client.post(url, json.dumps({'team': self.team2.public_id}), content_type='application/json')
+        response = self.client.post(url, json.dumps({'teamId': self.team2.public_id}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     def test_team_event_register_view(self):
         url = reverse('create_event_registration', args=(self.event.public_id,))
         self.client.force_login(user=self.user3)
-        response = self.client.post(url, json.dumps({'team': self.team1.public_id}), content_type='application/json')
+        response = self.client.post(url, json.dumps({'teamId': self.team1.public_id}), content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(TeamEventRegistration.objects.filter(event=self.event, team=self.team1).exists())
         self.assertFalse(TeamEventRegistration.objects.get(event=self.event, team=self.team1).is_reserved)
