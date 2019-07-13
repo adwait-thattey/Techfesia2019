@@ -213,28 +213,27 @@ STATIC_ROOT = os.path.join(BASE_DIR,'static')
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# # sendgrid
-# SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-# SENDGRID_API_KEY = external_settings.SENDGRID_API_KEY
+# sendgrid
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+SENDGRID_API_KEY = external_settings.SENDGRID_API_KEY
 
-# EMAIL_BACKEND = external_settings.EMAIL_BACKEND
-# EMAIL_HOST = external_settings.EMAIL_BACKEND
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = external_settings.EMAIL_USE_TLS
-# EMAIL_HOST_USER = external_settings.EMAIL_HOST_USER
-# EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
-# PUBLIC_ID_LENGTH = external_settings.PUBLIC_ID_LENGTH
+EMAIL_BACKEND = external_settings.EMAIL_BACKEND
+EMAIL_HOST = external_settings.EMAIL_BACKEND
+EMAIL_PORT = 587
+EMAIL_USE_TLS = external_settings.EMAIL_USE_TLS
+EMAIL_HOST_USER = external_settings.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+PUBLIC_ID_LENGTH = external_settings.PUBLIC_ID_LENGTH
 
 
 
-#testing
-
-EMAIL_HOST='smtp.mail.yahoo.com'
-EMAIL_PORT=465
-EMAIL_HOST_USER='shubhambhagat111@yahoo.com'
-EMAIL_HOST_PASSWORD=''
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+#testing. This is the settings to be used for GMAIL.
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST='smtp.gmail.com'
+# EMAIL_PORT=587
+# EMAIL_HOST_USER='shubham.b18@iiits.in'
+# EMAIL_HOST_PASSWORD=''
+# EMAIL_USE_TLS = True
 
 FIREBASE_CREDENTIALS_PATH = external_settings.FIREBASE_CREDENTIALS_PATH
 
