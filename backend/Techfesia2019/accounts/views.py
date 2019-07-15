@@ -68,10 +68,9 @@ def activate(request, username, uidb64, token):
 
 class ProfilePictureUpdateView(APIView):
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, SelfOrStaff)
     parser_classes = (MultiPartParser, FormParser)
 
-    @method_decorator(is_user_calling_self)
     def post(self, request, username):
         user = get_object_or_404(User, username=username)
 

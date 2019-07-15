@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-def SelfOrStaff(permissions.BasePermission):
+class SelfOrStaff(permissions.BasePermission):
     """
     Allow user access only if it is requesting his own data
     or if the user is staff.
