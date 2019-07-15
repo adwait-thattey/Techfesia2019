@@ -73,6 +73,7 @@ class ProfilePictureUpdateView(APIView):
 
     def post(self, request, username):
         user = get_object_or_404(User, username=username)
+        self.check_object_permissions(request, user)
 
         modified_data_dict = {
             'uploaded_image': request.data.get('profile_picture'),
