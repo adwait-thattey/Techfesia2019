@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from accounts import serializers
 from accounts.utils import account_activation_token, send_account_activation_email
-from registration.decorators import is_user_calling_self
+from registration.permissions import SelfOrStaff
 from registration.models import User
 
 
@@ -21,33 +21,26 @@ class EmailConfirmed(APIView):
     """
         Deals with email confirmation of a user
     """
-
-    permission_classes = (IsAuthenticated,)
-
-    @method_decorator(is_user_calling_self)
+    permission_classes = (IsAuthenticated, SelfOrStaff)
+    
     def get(self, request, username):
         """
             return True if email
         """
 
         user = get_object_or_404(User, username=username)
-        #
-        # # TODO Replace these lines with a common auth wrapper or permission class
-        # if not request.user.is_staff:
-        #     if request.user != user:
-        #         return Response(status=status.HTTP_403_FORBIDDEN,
-        #                         data={"message": "You do not have permission to perform this action"})
+        self.check_object_permissions(request, user)
 
         return Response(status=status.HTTP_200_OK, data={"email_confirmed": user.email_confirmed})
 
-
-    @method_decorator(is_user_calling_self)
+    
     def post(self, request, username):
         """
             Send account activation email to user
         """
 
         user = get_object_or_404(User, username=username)
+        self.check_object_permissions(request, user)
 
         if user.email_confirmed:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={"message":"Your account email is already confirmed"})
