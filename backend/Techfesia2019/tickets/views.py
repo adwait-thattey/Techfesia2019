@@ -128,8 +128,6 @@ class TicketCommentListCreateView(APIView):
             comment.commenter = request.user.profile
         except Ticket.DoesNotExist:
             return Response({'error': 'Ticket Doesn\'t Exist'}, status=status.HTTP_404_NOT_FOUND)
-        except Profile.DoesNotExist:
-            return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except KeyError:
             return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
         comment.save()
@@ -197,12 +195,9 @@ class TicketSubscribeView(APIView):
             return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
         if not ticket.is_public:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        try:
-            profile = Profile.objects.get(user=request.user)
-            ticket.subscribers.add(profile)
-            ticket.save()
-        except Profile.DoesNotExist:
-            return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        profile = Profile.objects.get(user=request.user)
+        ticket.subscribers.add(profile)
+        ticket.save()
         return Response({'message': 'subscribed to ticket'}, status=status.HTTP_200_OK)
 
 
@@ -216,14 +211,11 @@ class TicketUnsubscribeView(APIView):
             return Response({'error': 'Ticket Does not exist'}, status=status.HTTP_404_NOT_FOUND)
         if not ticket.is_public:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        try:
-            if not ticket.subscribers.filter(user=request.user).exists():
-                return Response({'error': 'You are not subscribed to this ticket'},
-                                status=status.HTTP_422_UNPROCESSABLE_ENTITY
-                                )
-            profile = Profile.objects.get(user=request.user)
-            ticket.subscribers.remove(profile)
-            ticket.save()
-        except Profile.DoesNotExist:
-            return Response({'error': 'Profile not complete'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        if not ticket.subscribers.filter(user=request.user).exists():
+            return Response({'error': 'You are not subscribed to this ticket'},
+                            status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                            )
+        profile = Profile.objects.get(user=request.user)
+        ticket.subscribers.remove(profile)
+        ticket.save()
         return Response({'message': 'unsubscribed from ticket'}, status=status.HTTP_200_OK)
