@@ -54,7 +54,6 @@ class PaymentInitiateView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        print(request.data)
         data = dict(request.data)
         try:
             event_public_id = data['eventPublicId']
@@ -68,22 +67,32 @@ class PaymentInitiateView(APIView):
         try:
             base_event = Event.objects.get(public_id=event_public_id)
         except Event.DoesNotExist:
-            return Response({'error': 'Event Does Not exist'})
+            return Response({'error': 'Event Does Not exist'}, status=status.HTTP_404_NOT_FOUND)
         if base_event.team_event:
             event = base_event.teamevent
-            registration = TeamEventRegistration.objects.get(public_id=registration_id)
+            try:
+                registration = TeamEventRegistration.objects.get(public_id=registration_id)
+            except TeamEventRegistration.DoesNotExist:
+                return Response({'error': 'Registration does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            if registration.team.team_leader != request.user.profile:
+                return Response(status=status.HTTP_403_FORBIDDEN)
         else:
             event = base_event.soloevent
-            registration = SoloEventRegistration.objects.get(public_id=registration_id)
+            try:
+                registration = SoloEventRegistration.objects.get(public_id=registration_id)
+                if registration.profile != request.user.profile:
+                    return Response(status=status.HTTP_403_FORBIDDEN)
+            except SoloEventRegistration.DoesNotExist:
+                return Response({'error': 'Registration does not exist'}, status=status.HTTP_404_NOT_FOUND)
         if base_event.team_event:
             # Confirming Registration
             if registration in event.teameventregistration_set.all():
                 # Checking if payment is already complete
                 if registration.is_complete or \
-                Transaction.objects.filter(team_registration=registration, status='Successful').count() is not 0:
+                        Transaction.objects.filter(team_registration=registration, status='Successful').count() != 0:
                     return Response({'message': 'Already Paid'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-                transaction = Transaction.objects.create(created_by=profile, amount=event.fee,
+                transaction = Transaction.objects.create(created_by=profile, amount=registration.fee,
                                                          team_registration=registration, is_team_registration=True)
                 transaction.generate_order_id()
                 paytm_params = {
@@ -106,7 +115,7 @@ class PaymentInitiateView(APIView):
                 response = render_to_string('payments/pay.html',
                                             {**paytm_params, 'payment_url': settings.PAYTM_PAYMENT_URL}
                                             )
-                return HttpResponse(response)
+                return Response(response, content_type='text/html', status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'Registration Does not exist'}, status=status.HTTP_404_NOT_FOUND) 
         else:
@@ -114,10 +123,11 @@ class PaymentInitiateView(APIView):
 
                 # Checking if payment is already complete
 
-                if registration.is_complete or Transaction.objects.filter(solo_registration=registration, status='Successful').count() is not 0:
+                if registration.is_complete or \
+                        Transaction.objects.filter(solo_registration=registration, status='Successful').count() != 0:
                     return Response({'message': 'Already Paid'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-                transaction = Transaction.objects.create(created_by=profile, amount=event.fee,
+                transaction = Transaction.objects.create(created_by=profile, amount=registration.fee,
                                                          solo_registration=registration)
                 transaction.generate_order_id()
                 paytm_params = {
@@ -142,7 +152,7 @@ class PaymentInitiateView(APIView):
                                             {**paytm_params, 'payment_url': settings.PAYTM_PAYMENT_URL}
                                             )
                 print(response)
-                return HttpResponse(response)
+                return Response(response, content_type='text/html', status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'Registration Does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
