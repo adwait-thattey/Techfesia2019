@@ -121,7 +121,6 @@ class PaymentInitiateViewTestCase(APITestCase):
                                     content_type='application/json'
                                     )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.content_type, 'text/html')
 
     def test_payment_initiate_view(self):
         url = reverse('payment_initiate')
@@ -132,6 +131,5 @@ class PaymentInitiateViewTestCase(APITestCase):
                                     content_type='application/json'
                                     )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.content_type, 'text/html')
 
 
