@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'event_registrations',
     'blog',
     'etc',
+    'payments',
     'management'
 
 ]
@@ -230,3 +231,18 @@ FIREBASE_CREDENTIALS_PATH = external_settings.FIREBASE_CREDENTIALS_PATH
 # initialize firebase
 FIREBASE_CREDENTIALS = firebase_admin.credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
 default_app = firebase_admin.initialize_app(FIREBASE_CREDENTIALS)
+
+PAYTM_PRODUCTION = external_settings.PAYTM_PRODUCTION
+
+PAYTM_MERCHANT_ID = external_settings.PAYTM_MERCHANT_ID
+
+PAYTM_SECRET_KEY = external_settings.PAYTM_SECRET_KEY
+
+PAYTM_WEBSITE = external_settings.PAYTM_WEBSITE
+
+PAYTM_CHANNEL_ID = external_settings.PAYTM_CHANNEL_ID
+
+PAYTM_INDUSTRY_TYPE_ID = external_settings.PAYTM_INDUSTRY_TYPE_ID
+
+PAYTM_PAYMENT_URL = external_settings.PAYTM_PAYMENT_URL
+
