@@ -1,11 +1,11 @@
 import datetime as dt
-from json import dumps as json_dumps, loads as json_loads
+from json import dumps as json_dumps
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from registration.models import User
-from events.models import SoloEvent, TeamEvent
-from event_registrations.models import Team, TeamMember, SoloEventRegistration, TeamEventRegistration
+from events.models import SoloEvent
+from event_registrations.models import SoloEventRegistration
 from payments.models import Transaction
 
 
@@ -133,7 +133,5 @@ class PaymentInitiateViewTestCase(APITestCase):
                                     )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.content_type, 'text/html')
-
-
 
 

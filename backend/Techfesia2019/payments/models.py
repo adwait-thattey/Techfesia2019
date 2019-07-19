@@ -23,6 +23,8 @@ class Transaction(models.Model):
                                                       ('Successful', 'Successful')),
                               )
 
+    transaction_id = models.CharField(max_length=100, null=True, blank=True)
+
     def generate_order_id(self):
         self.order_id = self.created_on.strftime('TCHFS%Y%m%dODR') + '{0:04d}Test'.format(self.id)
         self.save()

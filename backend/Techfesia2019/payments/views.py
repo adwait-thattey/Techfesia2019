@@ -115,7 +115,7 @@ class PaymentInitiateView(APIView):
                 response = render_to_string('payments/pay.html',
                                             {**paytm_params, 'payment_url': settings.PAYTM_PAYMENT_URL}
                                             )
-                return Response(response, content_type='text/html', status=status.HTTP_201_CREATED)
+                return HttpResponse(response, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'Registration Does not exist'}, status=status.HTTP_404_NOT_FOUND) 
         else:
@@ -152,7 +152,7 @@ class PaymentInitiateView(APIView):
                                             {**paytm_params, 'payment_url': settings.PAYTM_PAYMENT_URL}
                                             )
                 print(response)
-                return Response(response, content_type='text/html', status=status.HTTP_201_CREATED)
+                return HttpResponse(response, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'Registration Does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -195,6 +195,7 @@ def callback(request):
         transaction.response_checksum = paytm_checksum
 
         if paytm_params['RESPCODE'] == '01':
+            transaction.transaction_id = paytm_params['TXNID']
             transaction.status = 'Successful'
             if transaction.is_team_registration:
                 registration = transaction.team_registration
@@ -264,6 +265,7 @@ def refresh_payment_status(transaction):
 
     if response['RESPCODE'] == '01':
         transaction.status = 'Successful'
+        transaction.transaction_id = response['TXNIDfrom ']
         if transaction.is_team_registration:
             registration = transaction.team_registration
         else:
@@ -277,4 +279,4 @@ def refresh_payment_status(transaction):
 
     transaction.save()
 
-    return
+    return transaction
