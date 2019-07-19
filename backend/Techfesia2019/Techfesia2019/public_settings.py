@@ -27,3 +27,21 @@ EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 PUBLIC_ID_LENGTH = 10
 
 FIREBASE_CREDENTIALS_PATH = os.path.join(BASE_DIR, "Techfesia2019", "fake_creds.json")
+
+PAYTM_PRODUCTION = False
+
+PAYTM_MERCHANT_ID = 'JlLJuL45031399299246'
+
+PAYTM_SECRET_KEY = 's_yo0x1u_bow5toi'
+
+PAYTM_WEBSITE = 'WEBSTAGING'
+
+PAYTM_CHANNEL_ID = 'WEB'
+
+PAYTM_INDUSTRY_TYPE_ID = 'Retail'
+
+if PAYTM_PRODUCTION:
+    PAYTM_PAYMENT_URL = "https://securegw.paytm.in/order/process/"
+else:
+    PAYTM_PAYMENT_URL = "https://securegw-stage.paytm.in/order/process/"
+
