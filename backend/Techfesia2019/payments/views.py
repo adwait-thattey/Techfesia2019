@@ -118,7 +118,7 @@ class PaymentInitiateView(APIView):
                 response = render_to_string('payments/pay.html',
                                             {**paytm_params, 'payment_url': settings.PAYTM_PAYMENT_URL}
                                             )
-                print(response)
+                # print(response)
                 return HttpResponse(response, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'Registration Does not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -193,7 +193,7 @@ def callback(request):
         # print('Request:', request)
         # print('Request Method:', request.method)
         # print('Request body:', request.body)
-        print('Request POST:', request.POST)
+        # print('Request POST:', request.POST)
 
         received_data = dict(request.POST)
         paytm_params = {}
@@ -261,13 +261,13 @@ def check_with_paytm(order_id, received_params):
         url = "https://securegw.paytm.in/order/status"
 
     response = requests.post(url, data=post_data, headers={"Content-type": "application/json"}).json()
-    print(response)
-    print(received_params)
+    # print(response)
+    # print(received_params)
     is_valid = response['TXNID'] == received_params['TXNID'] \
         and response['BANKTXNID'] == received_params['BANKTXNID'] \
         and response['TXNAMOUNT'] == received_params['TXNAMOUNT'] \
         and response['STATUS'] == received_params['STATUS']
-    print(is_valid)
+    # print(is_valid)
     return is_valid
 
 
