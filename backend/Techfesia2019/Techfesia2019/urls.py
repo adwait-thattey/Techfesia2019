@@ -24,6 +24,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('docs', schema_view),
     path('auth/', include("registration.urls")),
+    path('users/<str:username>/invitations/', include('event_registrations.invitation_urls')),
+    path('events/<str:public_id>/registrations/', include('event_registrations.event_registration_urls')),
     path('users/', include("accounts.urls")),
-    path('rest/', include('rest_framework.urls', namespace='rest_framework'))
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('teams/', include('event_registrations.team_urls')),
+    path('rest/', include('rest_framework.urls', namespace='rest_framework')),
+    path('csv/', include('event_registrations.csv_urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
