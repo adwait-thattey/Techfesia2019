@@ -118,13 +118,17 @@ class PaymentInitiateView(APIView):
                 response = render_to_string('payments/pay.html',
                                             {**paytm_params, 'payment_url': settings.PAYTM_PAYMENT_URL}
                                             )
-                # print(response)
+
+                # print(response)    # TODO: HTML response to rendered by frontend
+
                 return HttpResponse(response, status=status.HTTP_201_CREATED)
             else:
                 return Response({'error': 'Registration Does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PaytmCallbackView(APIView):
+
+    # TODO: Direct Routing to Backend needed but frontend should get the response
 
     @csrf_exempt
     def post(self, request):
@@ -172,6 +176,9 @@ class PaytmCallbackView(APIView):
             registration.is_complete = True
             registration.save()
             registration.event.refresh_participants()
+
+            # TODO: Add Option to Send an E-Mail on successful registration
+
         else:
             transaction.status = 'Failed'
 
@@ -185,62 +192,6 @@ class PaytmCallbackView(APIView):
         }
 
         return Response(context, status=status.HTTP_201_CREATED)
-
-
-@csrf_exempt
-def callback(request):
-    if request.method == 'POST':
-        # print('Request:', request)
-        # print('Request Method:', request.method)
-        # print('Request body:', request.body)
-        # print('Request POST:', request.POST)
-
-        received_data = dict(request.POST)
-        paytm_params = {}
-        paytm_checksum = received_data['CHECKSUMHASH'][0]
-        for key, value in received_data.items():
-            if key is not 'CHECKSUMHASH':
-                paytm_params[key] = str(value[0])
-        # Verify checksum
-        try:
-            is_valid_checksum = verify_checksum(paytm_params, settings.PAYTM_SECRET_KEY, paytm_checksum)
-        except ValueError:
-            return Response({'error': 'ERROR:IVCKSUM Contact site admin'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        if is_valid_checksum:
-            # print("Checksum Matched")
-            received_data['message'] = "Checksum Matched"
-        else:
-            # print("Checksum Mismatched")
-            received_data['message'] = "Checksum Mismatched"
-            # return Response({'error': 'Invalid Transaction'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            transaction = Transaction.objects.get(order_id=paytm_params['ORDERID'])
-        except Transaction.DoesNotExist:
-            return Response({'error': 'Invalid Transaction'}, status=status.HTTP_404_NOT_FOUND)
-
-        if check_with_paytm(transaction.order_id, paytm_params) is False:
-            return HttpResponse('Forged Transaction')
-
-        transaction.response_checksum = paytm_checksum
-
-        if paytm_params['RESPCODE'] == '01':
-            transaction.transaction_id = paytm_params['TXNID']
-            transaction.status = 'Successful'
-            if transaction.is_team_registration:
-                registration = transaction.team_registration
-            else:
-                registration = transaction.solo_registration
-
-            registration.is_complete = True
-            registration.save()
-            registration.event.refresh_participants()
-        else:
-            transaction.status = 'Failed'
-
-        transaction.save()
-
-        return render(request, 'payments/callback.html', context=received_data)
 
 
 def check_with_paytm(order_id, received_params):
