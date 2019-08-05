@@ -62,6 +62,10 @@ class Event(models.Model):
 
     reserved_slots = models.IntegerField(default=0, help_text="No of participant slots reserved for external players")
 
+    fee = models.IntegerField(default=0)
+
+    reserved_fee = models.IntegerField(default=0)
+
     def save(self, *args, **kwargs):
         if not self.public_id:
             self.public_id = generate_public_id(self)

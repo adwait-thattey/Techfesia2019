@@ -139,6 +139,13 @@ class SoloEventRegistration(models.Model):
         else:
             return 'payment pending'
 
+    @property
+    def fee(self):
+        if self.is_reserved:
+            return self.event.reserved_fee
+        else:
+            return self.event.fee
+
     def clean(self):
         if self.is_complete is False and self.is_confirmed is True:
             raise ValidationError(_("Registration can not be confirmed until it is complete"))
@@ -187,6 +194,13 @@ class TeamEventRegistration(models.Model):
     @property
     def event_type(self):
         return 'team'
+
+    @property
+    def fee(self):
+        if self.is_reserved:
+            return self.event.reserved_fee
+        else:
+            return self.event.fee
 
     @property
     def get_event_public_id(self):
