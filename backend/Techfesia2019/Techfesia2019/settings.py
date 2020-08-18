@@ -225,6 +225,16 @@ EMAIL_HOST_USER = external_settings.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
 PUBLIC_ID_LENGTH = external_settings.PUBLIC_ID_LENGTH
 
+
+
+#testing. This is the settings to be used for GMAIL.
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST='smtp.gmail.com'
+# EMAIL_PORT=587
+# EMAIL_HOST_USER='shubham.b18@iiits.in'
+# EMAIL_HOST_PASSWORD=''
+# EMAIL_USE_TLS = True
+
 FIREBASE_CREDENTIALS_PATH = external_settings.FIREBASE_CREDENTIALS_PATH
 
 

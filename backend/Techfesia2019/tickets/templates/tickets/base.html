@@ -1,0 +1,158 @@
+{% autoescape off %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+   <head>
+      <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+      <title></title>
+      <style type="text/css">
+         <!--
+            .hmmessage P
+            {
+            margin:0px;
+            padding:0px
+            }
+            body.hmmessage
+            {
+            font-size: 10pt;
+            font-family:Verdana
+            }
+            #borderblack {
+            border-left-width: 1px;
+            border-left-style: solid;
+            border-left-color: #000000;
+            border-right-width: 1px;
+            border-right-style: solid;
+            border-right-color: #000000;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+            border-bottom-color: #000000;
+            }
+            .cHighPriority
+            {
+            color:red;
+            background-color:red;
+            }
+            .cMedPriority
+            {
+            color:#FF9A00;
+            background-color:#FF9A00;
+            }
+            .cLowPriority
+            {
+            color:green;
+            background-color:green;
+            }
+            
+            -->
+         a { color:#FF6600;}
+      </style>
+   </head>
+   <body class="hmmessage" style="background-color: rgb(239, 239, 239);">
+      <div style="background-color: rgb(239, 239, 239); font-size: 9pt; font-style: normal; font-variant: normal; font-weight: normal; line-height: normal; font-family: Arial,Verdana,sans-serif; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; color: rgb(91, 91, 91);">
+         <br>
+         <br>
+         <h2> TechFesia Ticket Notification </h2>
+         <table width="653" style="padding: 0pt 22px; color: rgb(91, 91, 91);">
+            <tbody>
+               <tr>
+                  <td></td>
+               </tr>
+            </tbody>
+         </table>
+         <table id="borderblack" style="padding: 0pt 22px; background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; color: rgb(91, 91, 91);" cellspacing="0" width="651">
+            <tbody>
+               <tr>
+                  <td style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; color: rgb(91, 91, 91);">
+                     <table border="0" cellpadding="0" cellspacing="0" width="605">
+                        <tbody>
+                           <tr valign="top">
+                              <td style="background: rgb(255, 255, 255) none repeat scroll 0%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; padding-right: 30px; font-size: 13px; font-family: Arial,Verdana,sans-serif; color: rgb(91, 91, 91); line-height: 1.5;">
+                                 <br>
+                                 {% if message %}
+                                 <p style="font-weight: bold;">
+                                    {{ message }}
+                                 </p>
+                                 {% endif %}
+                                 {% if ticket.comments.all != empty %}
+                                 <div style="padding: 5px;">
+                                    <table border="0" cellpadding="0" cellspacing="0">
+                                       <tbody>
+                                          <tr>
+                                             <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
+                                                <span style=font-size:110%;font-style:bold;color:red;>
+                                                	Ticket Status: {{ ticket.status }}
+                                                </span><br><br>
+                                                <br><span style="font-size:120%;">Ticket History</span>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                                 <hr noshade="noshade" style="width:100%;color:#FF6600">
+                                 <br>
+                                 {%endif%}
+                                 {% if last_comment %}
+                                 <p style="FONT-FAMILY: Trebuchet MS; COLOR: rgb(51,162,51); FONT-SIZE: 13px">
+                                    <i>On {{comment.posting_date }}, {{comment.commenter.username}} said:</i>
+                                 </p>
+                                 <br>
+                                 {{comment.text | escape}}<br>
+                                 {% endif %}
+                                 {% for comment in ticket.comments.all %} 
+                                 <div style="padding:8px;border:1px solid #E7E7E7; font-size:11px;">
+                                    <i style="font-weight:bold;font-size:11px;color:rgb(51,162,51);">On {{comment.posting_date }}, {{comment.commenter.username | escape}} said:</i><br>
+                                    <br>
+                                    <span style="padding:8px;">{{comment.text | escape}}</span>
+                                 </div>
+                                 <br>
+                                 {% endfor %}<br>
+                                 <div style="border: 1px solid rgb(204, 204, 204); padding: 8px; width: 410px; background-color: rgb(239, 239, 239); font-size: 11px;">
+                                    <h2 style="margin-bottom: 5px; margin-top: 0px; font-size: 11px;">
+                                       Ticket Overview
+                                    </h2>
+                                    Creator: {{ticket.opened_by.username | escape}}<br>
+                                    Event: {{ticket.event.title | escape}}<br>
+                                    Status: {{ ticket.status | escape}} <br>
+                                    Ticket URL: <a href="{{url | escape}}">{{url | escape}}</a><br>
+                                    <br>
+                                 </div>
+                                 <br>
+                                 <br>
+                              </td>
+                              <td width="30%" style="font-family: Arial,Verdana,sans-serif; font-size: 12px;">
+                                 <br>
+                                 <div style="border: 1px solid rgb(204, 204, 204); padding: 5px;">
+                                    <table border="0" cellpadding="0" cellspacing="0">
+                                       <tbody>
+                                          <tr>
+                                             <td style="border-bottom: 1px solid rgb(187, 187, 187); padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(255, 82, 0);">
+     												 Ticket Title: {{ ticket.title }}<br>
+													 Ticket ID: {{ticket.public_id}}<br>
+													 Opened By: {{ ticket.opened_by }}<br>
+     												 Status: {{ ticket.status }}<br>
+                                             </td>
+                                          </tr>
+                                          <tr>
+                                             <td style="padding: 6px 0pt; font-family: Arial,Verdana,sans-serif; font-size: 13px; color: rgb(51, 51, 51);">
+                                                 Visit the <a href='tickets_list_public'>Ticket Portal</a><br>
+                                             </td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+                                 </div>
+                                 <br>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+         <br>
+         <br>
+      </div>
+   </body>
+</html>
+{% endautoescape %}

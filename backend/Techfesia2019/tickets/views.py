@@ -11,9 +11,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 from rest_framework import status
-
+from django.dispatch import Signal, receiver
+from django.core.mail import get_connection, EmailMultiAlternatives
+from django.template.loader import get_template
+from django.conf import settings
 # Create your views here.
 
+
+notifications = Signal(providing_args = ['id'])
 
 class TicketCreateListView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -89,6 +94,10 @@ class TicketCloseView(APIView):
             ticket.content = dict(request.data).get('content')
             try:
                 ticket.save()
+                notifications.send(
+                    sender = Ticket,
+                    id = ticket.public_id 
+                    )
             except IntegrityError:
                 return Response({'error': 'required field "content" not provided'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = TicketSerializer(ticket)
@@ -131,6 +140,10 @@ class TicketCommentListCreateView(APIView):
         except KeyError:
             return Response({'error': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
         comment.save()
+        notifications.send(
+            sender = TicketComment,
+            id = comment.public_id,
+            )
         serializer = TicketCommentSerializer(comment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -219,3 +232,50 @@ class TicketUnsubscribeView(APIView):
         ticket.subscribers.remove(profile)
         ticket.save()
         return Response({'message': 'unsubscribed from ticket'}, status=status.HTTP_200_OK)
+
+@receiver(notifications)
+def send_emails(sender, **kwargs):
+    #When tickets are closed
+    if(sender == Ticket):
+        ticket_id = kwargs['id']
+        ticket = Ticket.objects.get(public_id = ticket_id)
+        message = 'Ticket has been closed by {}'.format(ticket.solved_by.user.username)
+        context = {
+            'ticket' : ticket,
+            'message': message,
+            'last_comment': None,
+            'url': 'localhost:8000/ticket/{}/detail'.format(ticket_id)
+        }
+        subject = 'Ticket no.{} is solved'.format(ticket_id)
+    #When new comments are created
+    else:
+        comment_id = kwargs['id']
+        comment = TicketComment.objects.get(public_id = comment_id)
+        ticket = comment.ticket
+        message =  'A new comment has been posted by {}'.format(comment.commenter.user.username)
+        context = {
+            'ticket' : ticket,
+            'message': message,
+            'last_comment': comment,
+            'url': 'localhost:8000/ticket/{}/detail'.format(comment.ticket.public_id)
+        }
+        subject = 'Ticket no.{} has a new comment'.format(comment.ticket.public_id)
+    
+    from_email = settings.EMAIL_HOST_USER;
+    to_email = []   
+    #Get all the subscribers email_ids
+    for subscriber in ticket.subscribers.all():
+        to_email.append(subscriber.user.email)
+
+    html_message = get_template('tickets/base.html').render(context)
+    text_message = message
+    
+    connection = get_connection()
+    connection.open()
+
+    msg = EmailMultiAlternatives(subject, text_message, from_email, to_email, connection=connection)                                      
+    msg.attach_alternative(html_message, "text/html")                                                                                                                                                                               
+    msg.send() 
+
+    connection.close()
+    
