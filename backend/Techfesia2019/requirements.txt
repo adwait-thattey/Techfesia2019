@@ -37,7 +37,7 @@ PyJWT==1.7.1
 python-http-client==3.1.0
 pytz==2019.1
 requests==2.22.0
-rsa==4.0
+rsa==4.1
 sendgrid==6.0.5
 sendgrid-django==4.2.0
 simplejson==3.16.0
